@@ -8,7 +8,11 @@
 
 namespace RumbleTeam\BBCodeParser;
 
+use RumbleTeam\BBCodeParser\Nodes\ContainerNode;
+use RumbleTeam\BBCodeParser\Nodes\Node;
+use RumbleTeam\BBCodeParser\Nodes\RootNode;
 use RumbleTeam\BBCodeParser\Nodes\TagNode;
+use RumbleTeam\BBCodeParser\Nodes\TextNode;
 use RumbleTeam\BBCodeParser\Token\Token;
 
 class BBCodeParser
@@ -30,59 +34,44 @@ class BBCodeParser
      */
     public function parse($text)
     {
-        $tokenStack = $this->tokenize($text);
+        $tokenStack = Token::tokenize($text);
         $bbCodeTree = $this->lex($tokenStack);
         $html = $this->render($bbCodeTree);
         return $html;
     }
 
-    /**
-     * @param string $input
-     * @return string[] stack of text-token
-     */
-    public function tokenize($input)
-    {
-        // Scan the input and break it down into possible tags and body text.
-        $symbols = '\d\w_,.?!@#$%&*()^=:\+\-\'\/';
-        $symbolsWithWhitespace = '\s' . $symbols;
-        $assignment = '\s*\=\s*(?:\"['.$symbolsWithWhitespace.']*\"|['.$symbols.']*)';
-        $name = '\w+[\d\w]*';
-        $regex = '/(\[\/?'.$name.'(?:'.$assignment.')?(?:\s+'.$name . $assignment.')*\/?\])/';
 
-        $tokenStack = array_reverse(preg_split($regex, $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE));
-
-        return $tokenStack;
-    }
 
     public function lex(array $scanChunks)
     {
         $state = new BBCodeParserState($scanChunks);
-        $rootNode = new TagNode();
-        $this->parseChildren($state, $rootNode);
+        $rootNode = new RootNode();
+        $this->buildTree($state, $rootNode);
         return $rootNode;
     }
 
 
-    private function parseChildren(BBCodeParserState $state, TagNode $parent)
+    private function buildTree(BBCodeParserState $state, ContainerNode $parent)
     {
-        $break = false;
         while ($tokenText = $state->next())
         {
             $token = $this->getTokenForTokenText($tokenText);
             switch ($token->getType())
             {
                 case Token::TYPE_OPENING:
-                    $newNode = new TagNode($token);
+                    $newNode = new TagNode();
                     $parent->add($newNode);
-                    $this->parseChildren($state, $newNode);
+                    $parent = $newNode;
                     break;
                 case Token::TYPE_CLOSING:
-                    $break = ($parent->getName() == $token->getName());
+                    if ($parent instanceof TagNode && $parent->hasParent() && $parent->getName() == $token->getName())
+                    {
+                        $parent = $parent->getParent();
+                    }
                     break;
                 default:
-                    $parent->add(new TagNode($token->getText()));
+                    $parent->add(new TextNode($token->getText()));
             }
-            if ($break) {break;}
         }
     }
 
@@ -98,10 +87,10 @@ class BBCodeParser
     }
 
     /**
-     * @param TagNode $bbCodeNode
+     * @param Node $bbCodeNode
      * @return string
      */
-    private function render(TagNode $bbCodeNode)
+    private function render(Node $bbCodeNode)
     {
         // traverse tree (recursively call render)
         // given by bbcode definitions: render opening part, render all children, render closing part

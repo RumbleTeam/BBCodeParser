@@ -14,19 +14,16 @@ class TextNode extends Node
     /**
      * @var string
      */
-    private $content = '';
-
-    public function __construct()
-    {
-        parent::__construct(self::TYPE_TEXT);
-    }
+    private $content;
 
     /**
-     * @return bool
+     * @param string $content
      */
-    public function hasContent()
+    public function __construct($content)
     {
-        return !empty($this->content);
+        parent::__construct(self::TYPE_TEXT);
+
+        $this->content = $content;
     }
 
     /**

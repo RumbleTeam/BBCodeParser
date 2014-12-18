@@ -26,9 +26,9 @@ abstract class ContainerNode extends Node
 
     /**
      * Adds a child to the node
-     * @param \RumbleTeam\BBCodeParser\Nodes\TagNode $node
+     * @param \RumbleTeam\BBCodeParser\Nodes\Node $node
      */
-    public function add(TagNode $node)
+    public function add(Node $node)
     {
         $this->children[] = $node;
         $node->setParent($this);
