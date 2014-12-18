@@ -18,7 +18,7 @@ class TextNode extends Node
 
     public function __construct()
     {
-        parent::__construct(self::TYPE_PLAINTEXT);
+        parent::__construct(self::TYPE_TEXT);
     }
 
     /**

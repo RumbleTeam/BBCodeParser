@@ -8,9 +8,9 @@
 
 namespace RumbleTeam\BBCodeParser\Nodes;
 
-class Node
+abstract class Node
 {
-    const TYPE_PLAINTEXT = 'plaintext';
+    const TYPE_TEXT = 'plaintext';
     const TYPE_ROOT = 'root';
     const TYPE_TAG = 'tag';
 
@@ -24,11 +24,14 @@ class Node
      */
     private $parent = null;
 
+    /**
+     * @param $type
+     */
     public function __construct($type)
     {
         switch ($type)
         {
-            case self::TYPE_PLAINTEXT:
+            case self::TYPE_TEXT:
             case self::TYPE_ROOT:
             case self::TYPE_TAG:
                 break;
