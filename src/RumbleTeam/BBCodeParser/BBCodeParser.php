@@ -8,7 +8,7 @@
 
 namespace RumbleTeam\BBCodeParser;
 
-use RumbleTeam\BBCodeParser\Nodes\TreeNode;
+use RumbleTeam\BBCodeParser\Nodes\TagNode;
 use RumbleTeam\BBCodeParser\Token\Token;
 
 class BBCodeParser
@@ -57,13 +57,13 @@ class BBCodeParser
     public function lex(array $scanChunks)
     {
         $state = new BBCodeParserState($scanChunks);
-        $rootNode = new TreeNode();
+        $rootNode = new TagNode();
         $this->parseChildren($state, $rootNode);
         return $rootNode;
     }
 
 
-    private function parseChildren(BBCodeParserState $state, TreeNode $parent)
+    private function parseChildren(BBCodeParserState $state, TagNode $parent)
     {
         $break = false;
         while ($tokenText = $state->next())
@@ -72,7 +72,7 @@ class BBCodeParser
             switch ($token->getType())
             {
                 case Token::TYPE_OPENING:
-                    $newNode = new TreeNode($token);
+                    $newNode = new TagNode($token);
                     $parent->add($newNode);
                     $this->parseChildren($state, $newNode);
                     break;
@@ -80,7 +80,7 @@ class BBCodeParser
                     $break = ($parent->getName() == $token->getName());
                     break;
                 default:
-                    $parent->add(new TreeNode($token->getText()));
+                    $parent->add(new TagNode($token->getText()));
             }
             if ($break) {break;}
         }
@@ -98,10 +98,10 @@ class BBCodeParser
     }
 
     /**
-     * @param TreeNode $bbCodeNode
+     * @param TagNode $bbCodeNode
      * @return string
      */
-    private function render(TreeNode $bbCodeNode)
+    private function render(TagNode $bbCodeNode)
     {
         // traverse tree (recursively call render)
         // given by bbcode definitions: render opening part, render all children, render closing part
