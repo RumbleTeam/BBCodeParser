@@ -8,9 +8,13 @@
 
 set_include_path(realpath('../src'));
 spl_autoload_register();
-
+$start = microtime(true);
 $tokenList = \RumbleTeam\BBCodeParser\Token\Token::tokenize(
-    ' 123 [/a=1 b=2 c=3/] 123 [/d="4 5" e="6 7" c=3/] 123 '
+    ' 123 [url] 234 [tataaa/] 345 [/url] 456 '
 );
-
+$parser = new \RumbleTeam\BBCodeParser\BBCodeParser(array());
+$tree = $parser->lex($tokenList);
+$end = microtime(true);
 print_r($tokenList);
+print_r($tree);
+echo "Time:" . ($end-$start) . PHP_EOL;

@@ -34,56 +34,54 @@ class BBCodeParser
      */
     public function parse($text)
     {
-        $tokenStack = Token::tokenize($text);
-        $bbCodeTree = $this->lex($tokenStack);
+        $tokenList = Token::tokenize($text);
+        $bbCodeTree = $this->lex($tokenList);
         $html = $this->render($bbCodeTree);
         return $html;
     }
 
-
-
-    public function lex(array $scanChunks)
+    public function lex(array $tokenList)
     {
-        $state = new BBCodeParserState($scanChunks);
         $rootNode = new RootNode();
-        $this->buildTree($state, $rootNode);
+        $this->buildTree($tokenList, $rootNode);
         return $rootNode;
     }
 
-
-    private function buildTree(BBCodeParserState $state, ContainerNode $parent)
+    private function buildTree(array $tokenList, ContainerNode $parent)
     {
-        while ($tokenText = $state->next())
+        reset($tokenList);
+        /**
+         * @var $token Token
+         */
+        $token = current($tokenList);
+        do
         {
-            $token = $this->getTokenForTokenText($tokenText);
             switch ($token->getType())
             {
                 case Token::TYPE_OPENING:
-                    $newNode = new TagNode();
+                    $newNode = new TagNode($token->getMatch(), $token->getName());
                     $parent->add($newNode);
                     $parent = $newNode;
                     break;
                 case Token::TYPE_CLOSING:
-                    if ($parent instanceof TagNode && $parent->hasParent() && $parent->getName() == $token->getName())
-                    {
+                    if ($parent instanceof TagNode
+                        && $parent->hasParent()
+                        && $parent->getName() == $token->getName()
+                    ) {
                         $parent = $parent->getParent();
                     }
+                    else
+                    {
+                        $parent->add(new TextNode($token->getMatch()));
+                    }
+                    break;
+                case Token::TYPE_SELF_CLOSING:
+                    $parent->add(new TagNode($token->getMatch(), $token->getName()));
                     break;
                 default:
-                    $parent->add(new TextNode($token->getText()));
+                    $parent->add(new TextNode($token->getMatch()));
             }
-        }
-    }
-
-    /**
-     * @param string $token
-     * @return Token
-     */
-    private function getTokenForTokenText($token)
-    {
-        // read name and attributes. if not available return a plaintext node
-        // check definitions if tag is self-closing
-        // create node with given properties
+        } while ($token = next($tokenList));
     }
 
     /**

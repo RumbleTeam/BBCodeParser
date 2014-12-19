@@ -13,7 +13,6 @@ use RumbleTeam\BBCodeParser\Token\Token;
 class BBCodeParserState
 {
     public function __construct(array $textTokenList) {
-        $this->token = new Token();
         $this->tokenList = $textTokenList;
         reset($this->tokenList);
     }

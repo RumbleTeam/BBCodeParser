@@ -130,14 +130,15 @@ class Token
     ) {
         $token = new Token($match);
         $type = self::TYPE_UNDEFINED;
+        $token->setName($name);
+        $token->setValue($value);
         if (empty($name))
         {
             $type = self::TYPE_TEXT;
         }
         else
         {
-            $token->setName($name);
-            $token->setValue($value);
+            $type = self::TYPE_OPENING;
             if ($closing)
             {
                 $type = self::TYPE_CLOSING;
