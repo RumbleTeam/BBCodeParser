@@ -27,14 +27,19 @@ class Token
     private $match;
 
     /**
+     * @var array
+     */
+    private $attributes = array();
+
+    /**
      * @var string
      */
     private $type = self::TYPE_UNDEFINED;
 
+    const TYPE_TEXT = 'text';
     const TYPE_OPENING = 'opening';
     const TYPE_CLOSING = 'closing';
     const TYPE_SELF_CLOSING = 'selfClosing';
-    const TYPE_TEXT = 'text';
     const TYPE_UNDEFINED = 'undefined';
 
     const REGEX_NAME = '\w+[\d\w]*';
@@ -61,7 +66,7 @@ class Token
         $namedValueRegex = '(?:\"(?<QUOTED_VALUE>[' . $quotedSymbols . ']*)\"|(?<VALUE>[' . self::REGEX_SYMBOLS . ']*))';
 
         $attributeRegex = '(?:' . self::REGEX_NAME . '\s*\=\s*' . $valueRegex . ')';
-        $namedAttributeRegex = $namedNameRegex . '\s*\=\s*' . $namedValueRegex;
+        $namedAttributeRegex = '/' . $namedNameRegex . '\s*\=\s*' . $namedValueRegex . '/';
 
         $regex = '/\[(?<CLOSING>\/?)' . $namedNameRegex . '(?:\s*\=\s*' . $namedValueRegex . ')?(?<ATTRIBUTES>(?:\s+' . $attributeRegex . ')*)?\s*(?<SELF_CLOSING>\/)?\]/';
 
@@ -69,7 +74,6 @@ class Token
         $matchCount = preg_match_all($regex, $input, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE, 0);
 
         //print_r($matches);
-
         $tokenList = array();
         if (empty($matchCount))
         {
@@ -98,14 +102,21 @@ class Token
 
                 $endOfLastMatch = $endPosition;
 
-                $name = $match['NAME'][0];
+                $name = strtoupper($match['NAME'][0]);
                 $closing = !empty($match['CLOSING'][0]);
                 $selfClosing = !empty($match['SELF_CLOSING'][0]);
 
-                self::addToken($tokenList, $fullMatch, $name, '', $closing, $selfClosing);
+                if (isset($match['VALUE_QUOTED']))
+                {
+                    $value = $match['VALUE_QUOTED'][0];
+                }
+                else
+                {
+                    $value = $match['VALUE'][0];
+                }
 
-                //echo $endOfLastMatch.PHP_EOL;
-                //var_dump($match);
+                $attributes = self::parseAttributes($namedAttributeRegex, $match['ATTRIBUTES'][0]);
+                self::addToken($tokenList, $fullMatch, $name, $value, $attributes, $closing, $selfClosing);
             }
 
             $endOfInput = strlen($input);
@@ -125,13 +136,15 @@ class Token
         $match,
         $name = '',
         $value = '',
+        $attributes = array(),
         $closing = false,
         $selfClosing = false
     ) {
         $token = new Token($match);
-        $type = self::TYPE_UNDEFINED;
         $token->setName($name);
         $token->setValue($value);
+        $token->setAttributes($attributes);
+
         if (empty($name))
         {
             $type = self::TYPE_TEXT;
@@ -151,6 +164,28 @@ class Token
 
         $token->setType($type);
         $tokenList[] = $token;
+    }
+
+    private static function parseAttributes($regex, $text)
+    {
+        $attributes = array();
+
+        preg_match_all($regex, $text, $matches, PREG_SET_ORDER);
+        foreach ($matches as $match)
+        {
+            if (isset($match['QUOTED_VALUE']))
+            {
+                $value = $match['QUOTED_VALUE'];
+            }
+            else
+            {
+                $value = $match['VALUE'];
+            }
+
+            $attributes[$match['NAME']] = $value;
+        }
+
+        return $attributes;
     }
 
     /**
@@ -207,5 +242,21 @@ class Token
     public function getMatch()
     {
         return $this->match;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @param array $attributes
+     */
+    private function setAttributes($attributes)
+    {
+        $this->attributes = $attributes;
     }
 }

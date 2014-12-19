@@ -9,44 +9,28 @@
 namespace RumbleTeam\BBCodeParser\Nodes;
 
 
+use RumbleTeam\BBCodeParser\Tags\TagDefinition;
+use RumbleTeam\BBCodeParser\Tags\TagDefinitionInterface;
+use RumbleTeam\BBCodeParser\Token\Token;
+
 class TagNode extends ContainerNode
 {
     /**
-     * @var string
+     * @var TagDefinition
      */
-    private $match;
+    private $definition;
 
     /**
-     * @var string
+     * @var Token
      */
-    private $name;
+    private $token;
 
-    /**
-     * @var array
-     */
-    private $attributes;
-
-    /**
-     * @var string
-     */
-    private $value;
-
-    public function __construct($match = '', $name = '', $value = '', array $attributes = array())
+    public function __construct(TagDefinitionInterface $definition, Token $token)
     {
         parent::__construct(self::TYPE_TAG);
 
-        $this->match = $match;
-        $this->name = $name;
-        $this->attributes = $attributes;
-        $this->value = $value;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasMatch()
-    {
-        return !empty($this->match);
+        $this->definition = $definition;
+        $this->token = $token;
     }
 
     /**
@@ -54,23 +38,7 @@ class TagNode extends ContainerNode
      */
     public function getMatch()
     {
-        return $this->match;
-    }
-
-    /**
-     * @param string $match
-     */
-    public function setMatch($match)
-    {
-        $this->match = $match;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasName()
-    {
-        return !empty($this->name);
+        return $this->token->getMatch();
     }
 
     /**
@@ -78,23 +46,7 @@ class TagNode extends ContainerNode
      */
     public function getName()
     {
-        return $this->name;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasValue()
-    {
-        return !empty($this->value);
+        return $this->token->getName();
     }
 
     /**
@@ -102,14 +54,22 @@ class TagNode extends ContainerNode
      */
     public function getValue()
     {
-        return $this->value;
+        return $this->token->getValue();
     }
 
     /**
-     * @param string $value
+     * @return array
      */
-    public function setValue($value)
+    public function getAttributes()
     {
-        $this->value = $value;
+        return $this->token->getAttributes();
+    }
+
+    /**
+     * @return TagDefinition
+     */
+    public function getDefinition()
+    {
+        return $this->definition;
     }
 }

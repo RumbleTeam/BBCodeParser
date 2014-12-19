@@ -13,6 +13,7 @@ use RumbleTeam\BBCodeParser\Nodes\Node;
 use RumbleTeam\BBCodeParser\Nodes\RootNode;
 use RumbleTeam\BBCodeParser\Nodes\TagNode;
 use RumbleTeam\BBCodeParser\Nodes\TextNode;
+use RumbleTeam\BBCodeParser\Tags\TagDefinitionInterface;
 use RumbleTeam\BBCodeParser\Token\Token;
 
 class BBCodeParser
@@ -20,11 +21,20 @@ class BBCodeParser
     /**
      * @var array
      */
-    private $bbCodeDefinitions;
+    private $definitions;
 
+    /**
+     * @param TagDefinitionInterface[] $bbCodeDefinitions
+     */
     public function __construct(array $bbCodeDefinitions)
     {
-        $this->bbCodeDefinitions = $bbCodeDefinitions;
+        $definitions = array();
+        foreach ($bbCodeDefinitions as $definition)
+        {
+            $definitions[strtoupper($definition->getName())] = $definition;
+        }
+
+        $this->definitions = $definitions;
     }
 
     /**
@@ -56,32 +66,61 @@ class BBCodeParser
         $token = current($tokenList);
         do
         {
-            switch ($token->getType())
+            $match = $token->getMatch();
+            $tokenName = $token->getName();
+            if (isset($this->definitions[$tokenName]))
             {
-                case Token::TYPE_OPENING:
-                    $newNode = new TagNode($token->getMatch(), $token->getName());
-                    $parent->add($newNode);
-                    $parent = $newNode;
-                    break;
-                case Token::TYPE_CLOSING:
-                    if ($parent instanceof TagNode
-                        && $parent->hasParent()
-                        && $parent->getName() == $token->getName()
-                    ) {
-                        $parent = $parent->getParent();
-                    }
-                    else
+                /** @var TagDefinitionInterface $definition */
+                $definition = $this->definitions[$tokenName];
+                $isVoid = $definition->isVoid();
+                if ($isVoid)
+                {
+                    switch ($token->getType())
                     {
-                        $parent->add(new TextNode($token->getMatch()));
+                        case Token::TYPE_OPENING:
+                        case Token::TYPE_SELF_CLOSING:
+                            $parent->add(new TagNode($definition, $token));
+                            break;
+                        default:
+                            $parent->add(new TextNode($match));
                     }
-                    break;
-                case Token::TYPE_SELF_CLOSING:
-                    $parent->add(new TagNode($token->getMatch(), $token->getName()));
-                    break;
-                default:
-                    $parent->add(new TextNode($token->getMatch()));
+                }
+                else
+                {
+                    switch ($token->getType())
+                    {
+                        case Token::TYPE_OPENING:
+                            $newNode = new TagNode($definition, $token);
+                            $parent->add($newNode);
+                            $parent = $newNode;
+                            break;
+                        case Token::TYPE_CLOSING:
+                            if ($parent instanceof TagNode
+                                && $parent->hasParent()
+                                && $parent->getName() == $token->getName()
+                            ) {
+                                $parent = $parent->getParent();
+                            }
+                            else
+                            {
+                                $parent->add(new TextNode($token->getMatch()));
+                            }
+                            break;
+                        case Token::TYPE_SELF_CLOSING:
+                            $parent->add(new TextNode($match));
+                            break;
+                        default:
+                            $parent->add(new TextNode($match));
+                    }
+                }
+
             }
-        } while ($token = next($tokenList));
+            else
+            {
+                $parent->add(new TextNode($match));
+            }
+        }
+        while ($token = next($tokenList));
     }
 
     /**
@@ -90,10 +129,6 @@ class BBCodeParser
      */
     private function render(Node $node)
     {
-        // traverse tree (recursively call render)
-        // given by bbcode definitions: render opening part, render all children, render closing part
-        // render by callbacks? or use class as definition which contains render-methods or can use template engine.
-
         $result = '';
         switch ($node->getType())
         {
@@ -103,21 +138,26 @@ class BBCodeParser
                 break;
             case Node::TYPE_TAG:
                 /** @var $node TagNode */
-                $name = $node->getName();
                 if ($node->hasChildren())
                 {
-                    $result .= '<<' . $name . '>>';
-
+                    $renderedChildren = '';
                     foreach ($node->getChildren() as $child)
                     {
-                        $result .= $this->render($child);
+                        $renderedChildren .= $this->render($child);
                     }
 
-                    $result .= '<</' . $name . '>>';
+                    $result .= $node->getDefinition()->render(
+                        $node->getValue(),
+                        $node->getAttributes(),
+                        $renderedChildren
+                    );
                 }
                 else
                 {
-                    $result .= '<<' . $name . '/>>';
+                    $result .= $node->getDefinition()->render(
+                        $node->getValue(),
+                        $node->getAttributes()
+                    );
                 }
 
                 break;
