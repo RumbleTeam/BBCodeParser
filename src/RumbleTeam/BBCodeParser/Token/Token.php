@@ -25,7 +25,7 @@ class Token
     const TYPE_UNDEFINED = 'undefined';
 
     const REGEX_NAME = '\w+[\d\w]*';
-    const REGEX_SYMBOLS = '\d\w_,.?!@#$%&*()^=:\+\-\'\/';
+    const REGEX_SYMBOLS = '\d\w_,.?!@#$%&*()^=:\+\-\'';
 
     public function __construct($match)
     {
@@ -40,27 +40,55 @@ class Token
      */
     public static function tokenizeDirect($input)
     {
-        $symbolsWithWhitespace = '\s' . self::REGEX_SYMBOLS;
-        $assignment = '\s*\=\s*(?:\"[' . $symbolsWithWhitespace . ']*\"|[' . self::REGEX_SYMBOLS . ']*)';
-        $regex = '/(\[\/?' . self::REGEX_NAME . '(?:' . $assignment . ')?(?:\s+' . self::REGEX_NAME . $assignment .')*\/?\])/';
+        $quotedSymbols = '\s\/' . self::REGEX_SYMBOLS;
+        $namedName = '(?<NAME>' . self::REGEX_NAME . ')';
 
+        $value = '(?:\"[' . $quotedSymbols . ']*\"|[' . self::REGEX_SYMBOLS . ']*)';
+        $namedValue = '(?:\"(?<QUOTED_VALUE>[' . $quotedSymbols . ']*)\"|(?<VALUE>[' . self::REGEX_SYMBOLS . ']*))';
 
-        $matchCount = preg_match_all($regex, $input, $matches, PREG_PATTERN_ORDER | PREG_OFFSET_CAPTURE, 0);
-        //$tokenList = preg_split($regex, $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $attribute = '(?:' . self::REGEX_NAME . '\s*\=\s*' . $value . ')';
+        $namedAttribute = $namedName . '\s*\=\s*' . $namedValue;
+
+        $regex = '/\[(?<CLOSING>\/?)' . $namedName . '(?:\s*\=\s*' . $namedValue . ')?(?<ATTRIBUTES>(?:\s+' . $attribute . ')*)?\s*(?<SELF_CLOSING>\/)?\]/';
+
+        //echo $regex.PHP_EOL;
+        $matchCount = preg_match_all($regex, $input, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE, 0);
 
         $tokenList = array();
         if (empty($matchCount))
         {
+            //echo 'empty'.PHP_EOL;
             $token = new Token($input);
             $token->setText($input);
             $tokenList[] = $token;
         }
         else
         {
+            //var_dump($matches);
             $endOfLastMatch = 0;
             foreach ($matches as $match)
             {
-                echo $endOfLastMatch;
+                $fullMatch = $match[0][0];
+                $position = $match[0][0];
+                $length = count($fullMatch);
+                $endPosition = $position + $length;
+
+                $textLength = $endPosition - $endOfLastMatch;
+                if ($textLength > 0)
+                {
+                    $textTokenContent = substr($input, $endOfLastMatch, $textLength);
+                    self::addTextToken($tokenList, $textTokenContent);
+                }
+
+                $endOfLastMatch = $endPosition;
+
+                $name = $match['NAME'][0];
+                $closing = !empty($match['CLOSING'][0]);
+                $selfClosing = !empty($match['SELF_CLOSING'][0]);
+
+                self::addTagToken();
+
+                //echo $endOfLastMatch.PHP_EOL;
                 var_dump($match);
             }
         }
@@ -105,6 +133,10 @@ class Token
         $regex = '/(\[\/?' . self::REGEX_NAME . '(?:' . $assignment . ')?(?:\s+' . self::REGEX_NAME . $assignment .')*\/?\])/';
 
         return $regex;
+    }
+
+    private static function addTextToken(&$tokenList, $textTokenContent)
+    {
     }
 
     /**
