@@ -85,13 +85,50 @@ class BBCodeParser
     }
 
     /**
-     * @param Node $bbCodeNode
+     * @param Node $node
      * @return string
      */
-    private function render(Node $bbCodeNode)
+    private function render(Node $node)
     {
         // traverse tree (recursively call render)
         // given by bbcode definitions: render opening part, render all children, render closing part
         // render by callbacks? or use class as definition which contains render-methods or can use template engine.
+
+        $result = '';
+        switch ($node->getType())
+        {
+            case Node::TYPE_TEXT:
+                /** @var $node TextNode */
+                $result .= $node->getContent();
+                break;
+            case Node::TYPE_TAG:
+                /** @var $node TagNode */
+                $name = $node->getName();
+                if ($node->hasChildren())
+                {
+                    $result .= '<<' . $name . '>>';
+
+                    foreach ($node->getChildren() as $child)
+                    {
+                        $result .= $this->render($child);
+                    }
+
+                    $result .= '<</' . $name . '>>';
+                }
+                else
+                {
+                    $result .= '<<' . $name . '/>>';
+                }
+
+                break;
+            case RootNode::TYPE_ROOT:
+                /** @var $node RootNode */
+                foreach ($node->getChildren() as $child)
+                {
+                    $result .= $this->render($child);
+                }
+        }
+
+        return $result;
     }
 }
