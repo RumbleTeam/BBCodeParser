@@ -38,6 +38,40 @@ class Token
      * @param string $input
      * @return string[] stack of text-token
      */
+    public static function tokenizeDirect($input)
+    {
+        $symbolsWithWhitespace = '\s' . self::REGEX_SYMBOLS;
+        $assignment = '\s*\=\s*(?:\"[' . $symbolsWithWhitespace . ']*\"|[' . self::REGEX_SYMBOLS . ']*)';
+        $regex = '/(\[\/?' . self::REGEX_NAME . '(?:' . $assignment . ')?(?:\s+' . self::REGEX_NAME . $assignment .')*\/?\])/';
+
+
+        $matchCount = preg_match_all($regex, $input, $matches, PREG_PATTERN_ORDER | PREG_OFFSET_CAPTURE, 0);
+        //$tokenList = preg_split($regex, $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+
+        $tokenList = array();
+        if (empty($matchCount))
+        {
+            $token = new Token($input);
+            $token->setText($input);
+            $tokenList[] = $token;
+        }
+        else
+        {
+            $endOfLastMatch = 0;
+            foreach ($matches as $match)
+            {
+                echo $endOfLastMatch;
+                var_dump($match);
+            }
+        }
+
+        return $tokenList;
+    }
+
+    /**
+     * @param string $input
+     * @return string[] stack of text-token
+     */
     public static function tokenize($input)
     {
         $splitRegex = self::getSplitRegex();
@@ -46,6 +80,8 @@ class Token
 
         return $tokenList;
     }
+
+
 
     /**
      * @return string regex
