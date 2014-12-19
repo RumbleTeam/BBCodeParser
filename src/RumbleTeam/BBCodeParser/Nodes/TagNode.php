@@ -11,7 +11,7 @@ namespace RumbleTeam\BBCodeParser\Nodes;
 
 use RumbleTeam\BBCodeParser\Tags\TagDefinition;
 use RumbleTeam\BBCodeParser\Tags\TagDefinitionInterface;
-use RumbleTeam\BBCodeParser\Token\Token;
+use RumbleTeam\BBCodeParser\Token;
 
 class TagNode extends ContainerNode
 {
@@ -21,7 +21,7 @@ class TagNode extends ContainerNode
     private $definition;
 
     /**
-     * @var Token
+     * @var \RumbleTeam\BBCodeParser\Token
      */
     private $token;
 

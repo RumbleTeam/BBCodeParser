@@ -6,7 +6,7 @@
  * Time: 23:12
  */
 
-namespace RumbleTeam\BBCodeParser\Token;
+namespace RumbleTeam\BBCodeParser;
 
 
 class Token

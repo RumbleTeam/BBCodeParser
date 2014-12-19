@@ -14,7 +14,6 @@ use RumbleTeam\BBCodeParser\Nodes\RootNode;
 use RumbleTeam\BBCodeParser\Nodes\TagNode;
 use RumbleTeam\BBCodeParser\Nodes\TextNode;
 use RumbleTeam\BBCodeParser\Tags\TagDefinitionInterface;
-use RumbleTeam\BBCodeParser\Token\Token;
 
 class BBCodeParser
 {
