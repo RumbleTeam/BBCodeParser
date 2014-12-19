@@ -9,8 +9,8 @@
 set_include_path(realpath('../src'));
 spl_autoload_register();
 
-$tokenList = \RumbleTeam\BBCodeParser\Token\Token::tokenizeDirect(
-    '[/a=1 b=2 c=3/][/d="4 5" e="6 7" c=3/]'
+$tokenList = \RumbleTeam\BBCodeParser\Token\Token::tokenize(
+    ' 123 [/a=1 b=2 c=3/] 123 [/d="4 5" e="6 7" c=3/] 123 '
 );
 
-var_dump($tokenList);
+print_r($tokenList);
