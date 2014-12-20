@@ -36,11 +36,11 @@ class Token
      */
     private $type = self::TYPE_UNDEFINED;
 
-    const TYPE_TEXT = 'text';
-    const TYPE_OPENING = 'opening';
-    const TYPE_CLOSING = 'closing';
-    const TYPE_SELF_CLOSING = 'selfClosing';
     const TYPE_UNDEFINED = 'undefined';
+    const TYPE_TEXT = 'text';
+    const TYPE_TAG_OPENING = 'opening';
+    const TYPE_TAG_CLOSING = 'closing';
+    const TYPE_TAG_SELF_CLOSING = 'selfClosing';
 
     const REGEX_NAME = '\w+[\d\w]*';
     const REGEX_SYMBOLS = '\d\w_,.?!@#$%&*()^=:\+\-\'';
@@ -151,14 +151,14 @@ class Token
         }
         else
         {
-            $type = self::TYPE_OPENING;
+            $type = self::TYPE_TAG_OPENING;
             if ($closing)
             {
-                $type = self::TYPE_CLOSING;
+                $type = self::TYPE_TAG_CLOSING;
             }
             else if ($selfClosing)
             {
-                $type = self::TYPE_SELF_CLOSING;
+                $type = self::TYPE_TAG_SELF_CLOSING;
             }
         }
 
@@ -194,6 +194,14 @@ class Token
     public function getType()
     {
         return $this->type;
+    }
+
+    public static function isTagType($type)
+    {
+        $result = $type == self::TYPE_TAG_OPENING
+            || $type == self::TYPE_TAG_CLOSING
+            || $type == self::TYPE_TAG_SELF_CLOSING;
+        return $result;
     }
 
     /**

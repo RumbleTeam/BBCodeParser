@@ -66,18 +66,18 @@ class BBCodeParser
         do
         {
             $match = $token->getMatch();
-            $tokenName = $token->getName();
-            if (isset($this->definitions[$tokenName]))
-            {
+            if ($isTag = Token::isTagType($tokenType = $token->getType())
+                && isset($this->definitions[$tokenName = $token->getName()])
+            ) {
                 /** @var TagDefinitionInterface $definition */
                 $definition = $this->definitions[$tokenName];
                 $isVoid = $definition->isVoid();
                 if ($isVoid)
                 {
-                    switch ($token->getType())
+                    switch ($tokenType)
                     {
-                        case Token::TYPE_OPENING:
-                        case Token::TYPE_SELF_CLOSING:
+                        case Token::TYPE_TAG_OPENING:
+                        case Token::TYPE_TAG_SELF_CLOSING:
                             $parent->add(new TagNode($definition, $token));
                             break;
                         default:
@@ -86,17 +86,17 @@ class BBCodeParser
                 }
                 else
                 {
-                    switch ($token->getType())
+                    switch ($tokenType)
                     {
-                        case Token::TYPE_OPENING:
+                        case Token::TYPE_TAG_OPENING:
                             $newNode = new TagNode($definition, $token);
                             $parent->add($newNode);
                             $parent = $newNode;
                             break;
-                        case Token::TYPE_CLOSING:
+                        case Token::TYPE_TAG_CLOSING:
                             if ($parent instanceof TagNode
                                 && $parent->hasParent()
-                                && $parent->getName() == $token->getName()
+                                && $parent->getName() == $tokenName
                             ) {
                                 $parent = $parent->getParent();
                             }
@@ -104,9 +104,6 @@ class BBCodeParser
                             {
                                 $parent->add(new TextNode($token->getMatch()));
                             }
-                            break;
-                        case Token::TYPE_SELF_CLOSING:
-                            $parent->add(new TextNode($match));
                             break;
                         default:
                             $parent->add(new TextNode($match));
