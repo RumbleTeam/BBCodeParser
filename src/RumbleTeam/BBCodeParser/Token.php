@@ -42,8 +42,49 @@ class Token
     const TYPE_TAG_CLOSING = 'closing';
     const TYPE_TAG_SELF_CLOSING = 'selfClosing';
 
-    const REGEX_NAME = '\w+[\d\w]*';
-    const REGEX_SYMBOLS = '\d\w_,.?!@#$%&*()^=:\+\-\'';
+
+    static $initialized = false;
+    static $tagRegex = null;
+    static $attributeRegex = null;
+
+    private static function __static()
+    {
+        if (!self::$initialized)
+        {
+            $unnamedNameRegex = '\w+[\d\w]*';
+            $regexSymbols = '\d\w_,.?!@#$%&*()^=:\+\-\'';
+            $quotedSymbols = '\s\/' . $regexSymbols;
+            $namedNameRegex = '(?<NAME>' . $unnamedNameRegex . ')';
+
+            $unnamedValueRegex = '(?:\"[' . $quotedSymbols . ']*\"|[' . $regexSymbols . ']*)';
+            $namedValueRegex = '(?:\"(?<QUOTED_VALUE>[' . $quotedSymbols . ']*)\"|(?<VALUE>[' . $regexSymbols . ']*))';
+
+            $unnamedAttributesRegex =
+                '(?:'
+                . $unnamedNameRegex
+                . '\s*\=\s*'
+                . $unnamedValueRegex
+                . ')';
+
+            self::$attributeRegex =
+                '/'
+                . $namedNameRegex
+                . '\s*\=\s*'
+                . $namedValueRegex
+                . '/S';
+
+            self::$tagRegex =
+                '/\[(?<CLOSING>\/?)'
+                . $namedNameRegex
+                . '(?:\s*\=\s*'
+                . $namedValueRegex
+                . ')?(?<ATTRIBUTES>(?:\s+'
+                . $unnamedAttributesRegex
+                . ')*)?\s*(?<SELF_CLOSING>\/)?\]/S';
+
+            self::$initialized = true;
+        }
+    }
 
     /**
      * @param string $match
@@ -59,19 +100,8 @@ class Token
      */
     public static function tokenize($input)
     {
-        $quotedSymbols = '\s\/' . self::REGEX_SYMBOLS;
-        $namedNameRegex = '(?<NAME>' . self::REGEX_NAME . ')';
-
-        $valueRegex = '(?:\"[' . $quotedSymbols . ']*\"|[' . self::REGEX_SYMBOLS . ']*)';
-        $namedValueRegex = '(?:\"(?<QUOTED_VALUE>[' . $quotedSymbols . ']*)\"|(?<VALUE>[' . self::REGEX_SYMBOLS . ']*))';
-
-        $attributeRegex = '(?:' . self::REGEX_NAME . '\s*\=\s*' . $valueRegex . ')';
-        $namedAttributeRegex = '/' . $namedNameRegex . '\s*\=\s*' . $namedValueRegex . '/';
-
-        $regex = '/\[(?<CLOSING>\/?)' . $namedNameRegex . '(?:\s*\=\s*' . $namedValueRegex . ')?(?<ATTRIBUTES>(?:\s+' . $attributeRegex . ')*)?\s*(?<SELF_CLOSING>\/)?\]/';
-
-        //echo $regex.PHP_EOL;
-        $matchCount = preg_match_all($regex, $input, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE, 0);
+        self::__static();
+        $matchCount = preg_match_all(self::$tagRegex, $input, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE, 0);
 
         //print_r($matches);
         $tokenList = array();
@@ -115,7 +145,7 @@ class Token
                     $value = $match['VALUE'][0];
                 }
 
-                $attributes = self::parseAttributes($namedAttributeRegex, $match['ATTRIBUTES'][0]);
+                $attributes = self::parseAttributes($match['ATTRIBUTES'][0]);
                 self::addToken($tokenList, $fullMatch, $name, $value, $attributes, $closing, $selfClosing);
             }
 
@@ -166,11 +196,11 @@ class Token
         $tokenList[] = $token;
     }
 
-    private static function parseAttributes($regex, $text)
+    private static function parseAttributes($text)
     {
         $attributes = array();
 
-        preg_match_all($regex, $text, $matches, PREG_SET_ORDER);
+        preg_match_all(self::$attributeRegex, $text, $matches, PREG_SET_ORDER);
         foreach ($matches as $match)
         {
             if (isset($match['QUOTED_VALUE']))
