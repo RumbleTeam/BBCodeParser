@@ -43,7 +43,8 @@ class BBCodeParser
      */
     public function parse($text)
     {
-        $tokenList = Token::tokenize($text);
+        $tokenizer = BBCodeTokenizer::instance();
+        $tokenList = $tokenizer->tokenize($text);
         $bbCodeTree = $this->lex($tokenList);
         $html = $this->render($bbCodeTree);
         return $html;
