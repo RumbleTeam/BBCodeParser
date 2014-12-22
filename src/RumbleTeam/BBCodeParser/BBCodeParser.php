@@ -9,7 +9,6 @@
 namespace RumbleTeam\BBCodeParser;
 
 use RumbleTeam\BBCodeParser\Nodes\ContainerNode;
-use RumbleTeam\BBCodeParser\Nodes\Node;
 use RumbleTeam\BBCodeParser\Nodes\RootNode;
 use RumbleTeam\BBCodeParser\Nodes\TagNode;
 use RumbleTeam\BBCodeParser\Nodes\TextNode;
@@ -30,7 +29,7 @@ class BBCodeParser
         $definitions = array();
         foreach ($bbCodeDefinitions as $definition)
         {
-            $definitions[strtoupper($definition->getName())] = $definition;
+            $definitions[Token::getIdForName($definition->getName())] = $definition;
         }
 
         $this->definitions = $definitions;
@@ -46,7 +45,7 @@ class BBCodeParser
         $tokenizer = BBCodeTokenizer::instance();
         $tokenList = $tokenizer->tokenize($text);
         $bbCodeTree = $this->lex($tokenList);
-        $html = $this->render($bbCodeTree);
+        $html = $bbCodeTree->render();
         return $html;
     }
 
@@ -60,18 +59,17 @@ class BBCodeParser
     private function buildTree(array $tokenList, ContainerNode $parent)
     {
         reset($tokenList);
-        /**
-         * @var $token Token
-         */
+
+        /** @var $token Token */
         $token = current($tokenList);
+
         do
         {
-            $match = $token->getMatch();
             if ($isTag = Token::isTagType($tokenType = $token->getType())
-                && isset($this->definitions[$tokenName = $token->getName()])
+                && isset($this->definitions[$tokenId = $token->getId()])
             ) {
                 /** @var TagDefinitionInterface $definition */
-                $definition = $this->definitions[$tokenName];
+                $definition = $this->definitions[$tokenId];
                 $isVoid = $definition->isVoid();
                 if ($isVoid)
                 {
@@ -79,10 +77,10 @@ class BBCodeParser
                     {
                         case Token::TYPE_TAG_OPENING:
                         case Token::TYPE_TAG_SELF_CLOSING:
-                            $parent->add(new TagNode($definition, $token));
+                            $parent->add(new TagNode($token, $definition));
                             break;
                         default:
-                            $parent->add(new TextNode($match));
+                            $parent->add(new TextNode($token));
                     }
                 }
                 else
@@ -90,82 +88,32 @@ class BBCodeParser
                     switch ($tokenType)
                     {
                         case Token::TYPE_TAG_OPENING:
-                            $newNode = new TagNode($definition, $token);
+                            $newNode = new TagNode($token, $definition);
                             $parent->add($newNode);
                             $parent = $newNode;
                             break;
                         case Token::TYPE_TAG_CLOSING:
                             if ($parent instanceof TagNode
                                 && $parent->hasParent()
-                                && $parent->getName() == $tokenName
+                                && $parent->getToken()->getId() == $tokenId
                             ) {
                                 $parent = $parent->getParent();
                             }
                             else
                             {
-                                $parent->add(new TextNode($token->getMatch()));
+                                $parent->add(new TextNode($token));
                             }
                             break;
                         default:
-                            $parent->add(new TextNode($match));
+                            $parent->add(new TextNode($token));
                     }
                 }
-
             }
             else
             {
-                $parent->add(new TextNode($match));
+                $parent->add(new TextNode($token));
             }
         }
         while ($token = next($tokenList));
-    }
-
-    /**
-     * @param Node $node
-     * @return string
-     */
-    private function render(Node $node)
-    {
-        $result = '';
-        switch ($node->getType())
-        {
-            case Node::TYPE_TEXT:
-                /** @var $node TextNode */
-                $result .= $node->getContent();
-                break;
-            case Node::TYPE_TAG:
-                /** @var $node TagNode */
-                if ($node->hasChildren())
-                {
-                    $renderedChildren = '';
-                    foreach ($node->getChildren() as $child)
-                    {
-                        $renderedChildren .= $this->render($child);
-                    }
-
-                    $result .= $node->getDefinition()->render(
-                        $node->getValue(),
-                        $node->getAttributes(),
-                        $renderedChildren
-                    );
-                }
-                else
-                {
-                    $result .= $node->getDefinition()->render(
-                        $node->getValue(),
-                        $node->getAttributes()
-                    );
-                }
-
-                break;
-            case RootNode::TYPE_ROOT:
-                /** @var $node RootNode */
-                foreach ($node->getChildren() as $child)
-                {
-                    $result .= $this->render($child);
-                }
-        }
-
-        return $result;
     }
 }

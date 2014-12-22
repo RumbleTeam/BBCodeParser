@@ -9,6 +9,8 @@
 namespace RumbleTeam\BBCodeParser\Nodes;
 
 
+use RumbleTeam\BBCodeParser\Token;
+
 class TextNode extends Node
 {
     /**
@@ -17,13 +19,12 @@ class TextNode extends Node
     private $content;
 
     /**
-     * @param string $content
+     * @param Token $token
      */
-    public function __construct($content)
+    public function __construct(Token $token)
     {
         parent::__construct(self::TYPE_TEXT);
-
-        $this->content = $content;
+        $this->content = $token->getMatch();
     }
 
     /**
@@ -34,11 +35,8 @@ class TextNode extends Node
         return $this->content;
     }
 
-    /**
-     * @param string $content
-     */
-    public function setContent($content)
+    function render()
     {
-        $this->content = $content;
+        return $this->getContent();
     }
 }

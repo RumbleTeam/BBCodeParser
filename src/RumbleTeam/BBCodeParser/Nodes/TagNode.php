@@ -8,7 +8,6 @@
 
 namespace RumbleTeam\BBCodeParser\Nodes;
 
-
 use RumbleTeam\BBCodeParser\Tags\TagDefinition;
 use RumbleTeam\BBCodeParser\Tags\TagDefinitionInterface;
 use RumbleTeam\BBCodeParser\Token;
@@ -25,7 +24,7 @@ class TagNode extends ContainerNode
      */
     private $token;
 
-    public function __construct(TagDefinitionInterface $definition, Token $token)
+    public function __construct(Token $token, TagDefinitionInterface $definition)
     {
         parent::__construct(self::TYPE_TAG);
 
@@ -34,42 +33,28 @@ class TagNode extends ContainerNode
     }
 
     /**
-     * @return string
-     */
-    public function getMatch()
-    {
-        return $this->token->getMatch();
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->token->getName();
-    }
-
-    /**
-     * @return string
-     */
-    public function getValue()
-    {
-        return $this->token->getValue();
-    }
-
-    /**
-     * @return array
-     */
-    public function getAttributes()
-    {
-        return $this->token->getAttributes();
-    }
-
-    /**
      * @return TagDefinition
      */
     public function getDefinition()
     {
         return $this->definition;
+    }
+
+    /**
+     * @return Token
+     */
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    function render()
+    {
+        $token = $this->getToken();
+        return $this->getDefinition()->render(
+            $token->getValue(),
+            $token->getAttributes(),
+            parent::render()
+        );
     }
 }

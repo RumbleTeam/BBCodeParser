@@ -17,7 +17,7 @@ abstract class ContainerNode extends Node
     private $children = array();
 
     /**
-     * @return \RumbleTeam\BBCodeParser\Nodes\TagNode[]
+     * @return \RumbleTeam\BBCodeParser\Nodes\Node[]
      */
     public function getChildren()
     {
@@ -40,5 +40,16 @@ abstract class ContainerNode extends Node
     public function hasChildren()
     {
         return !empty($this->children);
+    }
+
+    public function render()
+    {
+        $result = '';
+        foreach ($this->getChildren() as $child)
+        {
+            $result .= $child->render();
+        }
+
+        return $result;
     }
 }

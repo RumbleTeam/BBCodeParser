@@ -122,7 +122,7 @@ class BBCodeTokenizer
 
                 $endOfLastMatch = $endPosition;
 
-                $name = strtoupper($match['NAME'][0]);
+                $name = $match['NAME'][0];
                 $closing = !empty($match['CLOSING'][0]);
                 $selfClosing = !empty($match['SELF_CLOSING'][0]);
 
@@ -135,7 +135,12 @@ class BBCodeTokenizer
                     $value = $match['VALUE'][0];
                 }
 
-                $attributes = self::parseAttributes($match['ATTRIBUTES'][0]);
+                $attributes = array();
+                $attributesText = trim($match['ATTRIBUTES'][0]);
+                if (!$closing && !empty($attributesText))
+                {
+                    $attributes = self::parseAttributes($attributesText);
+                }
 
                 self::addToken(
                     $tokenList,
@@ -163,6 +168,42 @@ class BBCodeTokenizer
         }
 
         return $tokenList;
+    }
+
+    /**
+     * @param string $text parses attributes from a
+     * bb-tag attribute string like >> a="x s" b=c <<
+     * @return string[] Attributes ['a'=>'x s', 'b'=>'c']
+     */
+    private function parseAttributes($text)
+    {
+
+        $attributes = array();
+        if (!empty($text))
+        {
+            preg_match_all(
+                $this->attributeRegex,
+                $text,
+                $matches,
+                PREG_SET_ORDER
+            );
+
+            foreach ($matches as $match)
+            {
+                if (isset($match['QUOTED_VALUE']))
+                {
+                    $value = $match['QUOTED_VALUE'];
+                }
+                else
+                {
+                    $value = $match['VALUE'];
+                }
+
+                $attributes[$match['NAME']] = $value;
+            }
+        }
+
+        return $attributes;
     }
 
     /**
@@ -204,32 +245,5 @@ class BBCodeTokenizer
 
         $token = new Token($match, $name, $value, $attributes, $type);
         $tokenList[] = $token;
-    }
-
-    /**
-     * @param string $text parses attributes from a
-     * bb-tag attribute string like >> a="x s" b=c <<
-     * @return string[] Attributes ['a'=>'x s', 'b'=>'c']
-     */
-    private function parseAttributes($text)
-    {
-        $attributes = array();
-
-        preg_match_all($this->attributeRegex, $text, $matches, PREG_SET_ORDER);
-        foreach ($matches as $match)
-        {
-            if (isset($match['QUOTED_VALUE']))
-            {
-                $value = $match['QUOTED_VALUE'];
-            }
-            else
-            {
-                $value = $match['VALUE'];
-            }
-
-            $attributes[$match['NAME']] = $value;
-        }
-
-        return $attributes;
     }
 }

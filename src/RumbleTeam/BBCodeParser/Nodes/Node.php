@@ -81,4 +81,6 @@ abstract class Node
     {
         return $this->parent != null;
     }
+
+    abstract function render();
 }

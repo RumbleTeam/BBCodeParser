@@ -66,6 +66,12 @@ class Token
         return $result;
     }
 
+    public static function getIdForName($name)
+    {
+        $result = strtolower($name);
+        return $result;
+    }
+
     /**
      * @return string
      */
@@ -80,6 +86,14 @@ class Token
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getId()
+    {
+        return self::getIdForName($this->name);
     }
 
     /**
