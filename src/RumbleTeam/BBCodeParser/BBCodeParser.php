@@ -69,8 +69,7 @@ class BBCodeParser
             ) {
                 /** @var TagDefinitionInterface $definition */
                 $definition = $this->definitions[$tokenId];
-                $isVoid = $definition->isVoid();
-                if ($isVoid)
+                if ($definition->isVoid())
                 {
                     switch ($tokenType)
                     {
