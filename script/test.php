@@ -19,13 +19,34 @@ $definitions = array(
 );
 
 $testSet = array(
-    array('in'=>'123', 'out'=>'123'),
-    array('in'=>'[br]', 'out'=>'<br>'),
-    array('in'=>'[/br]', 'out'=>'[/br]'),
-    array('in'=>'[img src="http://www.bild.de"]', 'out'=>'<img src="http://www.bild.de">'),
-    array('in'=>'[alf]', 'out'=>'[alf]'),
-    array('in'=>'[div]test[/div]', 'out'=>'<div>test</div>'),
-    array('in'=>'[div][div]gwe[/div]test', 'out'=>'<div><div>gwe</div>test</div>'),
+    array(
+        'in'=>'123',
+        'out'=>'123'
+    ),
+    array(
+        'in'=>'[br]',
+        'out'=>'<br>'
+    ),
+    array(
+        'in'=>'[/br]',
+        'out'=>'[/br]'
+    ),
+    array(
+        'in'=>'[img src="http://www.bild.de"]',
+        'out'=>'<img src="http://www.bild.de">'
+    ),
+    array(
+        'in'=>'[alf]',
+        'out'=>'[alf]'
+    ),
+    array(
+        'in'=>'[div]test[/div]',
+        'out'=>'<div>test</div>'
+    ),
+    array(
+        'in'=>'[div][div]gwe[/div]test',
+        'out'=>'<div><div>gwe</div>test</div>'
+    ),
 );
 
 $parser = new BBCodeParser($definitions);
