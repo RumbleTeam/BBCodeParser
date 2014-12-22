@@ -24,10 +24,12 @@ class TagNode extends ContainerNode
      */
     private $token;
 
+    /**
+     * @param Token $token
+     * @param TagDefinitionInterface $definition
+     */
     public function __construct(Token $token, TagDefinitionInterface $definition)
     {
-        parent::__construct(self::TYPE_TAG);
-
         $this->definition = $definition;
         $this->token = $token;
     }
@@ -48,12 +50,14 @@ class TagNode extends ContainerNode
         return $this->token;
     }
 
+    /**
+     * @return string
+     */
     function render()
     {
-        $token = $this->getToken();
-        return $this->getDefinition()->render(
-            $token->getValue(),
-            $token->getAttributes(),
+        return $this->definition->render(
+            $this->token->getValue(),
+            $this->token->getAttributes(),
             parent::render()
         );
     }

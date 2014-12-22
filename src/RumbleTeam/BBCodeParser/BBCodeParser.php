@@ -9,7 +9,6 @@
 namespace RumbleTeam\BBCodeParser;
 
 use RumbleTeam\BBCodeParser\Nodes\ContainerNode;
-use RumbleTeam\BBCodeParser\Nodes\RootNode;
 use RumbleTeam\BBCodeParser\Nodes\TagNode;
 use RumbleTeam\BBCodeParser\Nodes\TextNode;
 use RumbleTeam\BBCodeParser\Tags\TagDefinitionInterface;
@@ -51,7 +50,7 @@ class BBCodeParser
 
     public function lex(array $tokenList)
     {
-        $rootNode = new RootNode();
+        $rootNode = new ContainerNode();
         $this->buildTree($tokenList, $rootNode);
         return $rootNode;
     }

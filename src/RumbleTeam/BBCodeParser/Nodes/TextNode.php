@@ -23,7 +23,6 @@ class TextNode extends Node
      */
     public function __construct(Token $token)
     {
-        parent::__construct(self::TYPE_TEXT);
         $this->content = $token->getMatch();
     }
 
@@ -35,6 +34,9 @@ class TextNode extends Node
         return $this->content;
     }
 
+    /**
+     * @return string
+     */
     function render()
     {
         return $this->getContent();

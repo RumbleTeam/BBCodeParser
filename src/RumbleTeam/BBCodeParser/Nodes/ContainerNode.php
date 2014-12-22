@@ -8,8 +8,7 @@
 
 namespace RumbleTeam\BBCodeParser\Nodes;
 
-
-abstract class ContainerNode extends Node
+class ContainerNode extends Node
 {
     /**
      * @var TagNode[]
@@ -17,7 +16,7 @@ abstract class ContainerNode extends Node
     private $children = array();
 
     /**
-     * @return \RumbleTeam\BBCodeParser\Nodes\Node[]
+     * @return Node[]
      */
     public function getChildren()
     {
@@ -26,7 +25,7 @@ abstract class ContainerNode extends Node
 
     /**
      * Adds a child to the node
-     * @param \RumbleTeam\BBCodeParser\Nodes\Node $node
+     * @param Node $node
      */
     public function add(Node $node)
     {
@@ -42,10 +41,13 @@ abstract class ContainerNode extends Node
         return !empty($this->children);
     }
 
+    /**
+     * @return string
+     */
     public function render()
     {
         $result = '';
-        foreach ($this->getChildren() as $child)
+        foreach ($this->children as $child)
         {
             $result .= $child->render();
         }

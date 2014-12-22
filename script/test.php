@@ -18,13 +18,51 @@ $definitions = array(
     TagDefinition::create('img', true),
 );
 
+$testSet = array(
+    array('in'=>'123', 'out'=>'123'),
+    array('in'=>'[br]', 'out'=>'<br>'),
+    array('in'=>'[/br]', 'out'=>'[/br]'),
+    array('in'=>'[img src="http://www.bild.de"]', 'out'=>'<img src="http://www.bild.de">'),
+    array('in'=>'[alf]', 'out'=>'[alf]'),
+    array('in'=>'[div]test[/div]', 'out'=>'<div>test</div>'),
+    array('in'=>'[div][div]gwe[/div]test', 'out'=>'<div><div>gwe</div>test</div>'),
+);
+
 $parser = new BBCodeParser($definitions);
-$input = ' 123 [url=albern und=er] 2[img href="something"/][br][/img href="something"] 34 [div][tataaa alf="cool"/] 3[z]45 [/url] 4[/x]56 ';
+
+$successCount = 0;
+$failureCount = 0;
+foreach ($testSet as $test)
+{
+    $result = $parser->parse($test['in']);
+    if ($result === $test['out'])
+    {
+        $successCount++;
+    }
+    else
+    {
+        $failureCount++;
+    }
+}
+
+echo 'Success: ' . $successCount . PHP_EOL;
+echo 'Failure: ' . $failureCount . PHP_EOL;
 
 $start = microtime(true);
-$result = $parser->parse($input);
+
+$i = 100000;
+while ($i > 0)
+{
+    foreach ($testSet as $test)
+    {
+        if ($i > 0)
+        {
+            $parser->parse($test['in']);
+            $i--;
+        }
+    }
+}
+
 $end = microtime(true);
 
-echo 'IN  >|' . $input . '|<' . PHP_EOL;
-echo 'OUT >|' . $result . '|<' . PHP_EOL;
-echo "Time:" . ($end-$start) . PHP_EOL;
+echo 'Time for 100000 runs:    ' . ($end-$start) . PHP_EOL;

@@ -10,37 +10,10 @@ namespace RumbleTeam\BBCodeParser\Nodes;
 
 abstract class Node
 {
-    const TYPE_TEXT = 'plaintext';
-    const TYPE_ROOT = 'root';
-    const TYPE_TAG = 'tag';
-
-    /**
-     * @var string
-     */
-    private $type;
-
     /**
      * @var TagNode
      */
     private $parent = null;
-
-    /**
-     * @param $type
-     */
-    public function __construct($type)
-    {
-        switch ($type)
-        {
-            case self::TYPE_TEXT:
-            case self::TYPE_ROOT:
-            case self::TYPE_TAG:
-                break;
-            default:
-                throw new \InvalidArgumentException('Type invalid. see class-constants.');
-        }
-
-        $this->type = $type;
-    }
 
     /**
      * @return bool
@@ -48,14 +21,6 @@ abstract class Node
     public function isRoot()
     {
         return !$this->hasParent();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getType()
-    {
-        return $this->type;
     }
 
     /**
@@ -82,5 +47,8 @@ abstract class Node
         return $this->parent != null;
     }
 
+    /**
+     * @return string
+     */
     abstract function render();
 }
