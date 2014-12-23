@@ -22,11 +22,15 @@ interface TagDefinitionInterface
     public function isVoid();
 
     /**
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
+     * @param $id
+     * @return bool
+     */
+    public function isLegalChildId($id);
+
+    /**
+     * @param TagInterface $tag
      * @param string $content
      * @return string
      */
-    public function render($name, $value = '', $attributes = array(), $content = '');
+    public function render(TagInterface $tag, $content = '');
 }

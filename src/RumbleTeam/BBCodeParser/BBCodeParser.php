@@ -48,7 +48,7 @@ class BBCodeParser
     {
         reset($tokenList);
         $result = '';
-        $resultStack = array();
+        $parentStack = array();
         $lastElementPosition = -1;
 
         /** @var $token Token */
@@ -58,6 +58,7 @@ class BBCodeParser
         {
             if ($isTag = Token::isTagType($tokenType = $token->getType())
                 && isset($this->definitions[$tokenId = $token->getId()])
+                && $this->isLegalChild($parentStack, $tokenId)
             ) {
                 /** @var TagDefinitionInterface $definition */
                 $definition = $this->definitions[$tokenId];
@@ -70,15 +71,11 @@ class BBCodeParser
                         // the correct closing tag shows up.
                         if ($isVoid)
                         {
-                            $result .= $definition->render(
-                                $token->getName(),
-                                $token->getValue(),
-                                $token->getAttributes()
-                            );
+                            $result .= $definition->render($token);
                         }
                         else
                         {
-                            $resultStack[] = array(
+                            $parentStack[] = array(
                                 $definition->getId(),
                                 $definition,
                                 $token,
@@ -91,11 +88,7 @@ class BBCodeParser
                         break;
                     case Token::TYPE_TAG_SELF_CLOSING:
                         // normal node, but has no content.
-                        $result .= $definition->render(
-                            $token->getName(),
-                            $token->getValue(),
-                            $token->getAttributes()
-                        );
+                        $result .= $definition->render($token);
                         break;
                     case Token::TYPE_TAG_CLOSING:
                         // check if the tag matches the current parent.
@@ -104,9 +97,9 @@ class BBCodeParser
                         // to proceed.
                         if (!$isVoid
                             && $lastElementPosition >= 0
-                            && $resultStack[$lastElementPosition][0] === $tokenId
+                            && $parentStack[$lastElementPosition][0] === $tokenId
                         ) {
-                            $parentTag = array_pop($resultStack);
+                            $parentTag = array_pop($parentStack);
                             $lastElementPosition--;
                             $result = $this->renderParent($parentTag, $result);
                         }
@@ -129,7 +122,7 @@ class BBCodeParser
         // one while to close them all.
         while ($lastElementPosition >= 0)
         {
-            $parentTag = array_pop($resultStack);
+            $parentTag = array_pop($parentStack);
             $lastElementPosition--;
             $result = $this->renderParent($parentTag, $result);
         }
@@ -149,13 +142,31 @@ class BBCodeParser
         /** @var Token $parentToken */
         $parentToken = $parentTagArray[2];
         $parentResult = $parentTagArray[3];
-        $parentResult .= $parentDefinition->render(
-            $parentToken->getName(),
-            $parentToken->getValue(),
-            $parentToken->getAttributes(),
-            $result
-        );
+        $parentResult .= $parentDefinition->render($parentToken, $result);
 
         return $parentResult;
+    }
+
+    /**
+     * @param array $parentStack
+     * @param string $tokenId
+     *
+     * @return bool
+     */
+    private function isLegalChild($parentStack, $tokenId)
+    {
+        $legal = true;
+        foreach ($parentStack as $parentTagArray)
+        {
+            /** @var TagDefinitionInterface $parentDefinition */
+            $parentDefinition = $parentTagArray[1];
+            $legal = $parentDefinition->isLegalChildId($tokenId);
+            if (!$legal)
+            {
+                break;
+            }
+        }
+
+        return $legal;
     }
 }

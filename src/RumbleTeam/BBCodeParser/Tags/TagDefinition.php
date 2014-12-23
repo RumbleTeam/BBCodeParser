@@ -20,20 +20,26 @@ class TagDefinition implements TagDefinitionInterface
      * @var bool
      */
     private $void;
+    /**
+     * @var array
+     */
+    private $childBlackList;
 
     /**
      * @param string $id
      * @param bool $void
+     * @param array $childBlackList
      */
-    public function __construct($id, $void = false)
+    public function __construct($id, $void = false, $childBlackList = array())
     {
-        $this->id = $id;
+        $this->id = strtolower($id);
         $this->void = $void;
+        $this->childBlackList = $childBlackList;
     }
 
-    public static function create($id, $void = false)
+    public static function create($id, $void = false, $childBlacklist = array())
     {
-        return new TagDefinition($id, $void);
+        return new TagDefinition($id, $void, $childBlacklist);
     }
 
     /**
@@ -53,19 +59,26 @@ class TagDefinition implements TagDefinitionInterface
     }
 
     /**
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
+     * @param $id
+     * @return bool
+     */
+    public function isLegalChildId($id)
+    {
+        return !in_array($id, $this->childBlackList);
+    }
+
+    /**
+     * @param TagInterface $tag
      * @param string $content
      * @return string
      */
-    public function render($name, $value = '', $attributes = array(), $content = '')
+    public function render(TagInterface $tag, $content = '')
     {
         $result = '';
 
         $result .= '<' . $this->id;
 
-        foreach ($attributes as $key => $value)
+        foreach ($tag->getAttributes() as $key => $value)
         {
             $result .= ' ' . $key . '="' . $value . '"';
         }

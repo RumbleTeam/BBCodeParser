@@ -9,7 +9,9 @@
 namespace RumbleTeam\BBCodeParser;
 
 
-class Token
+use RumbleTeam\BBCodeParser\Tags\TagInterface;
+
+class Token implements TagInterface
 {
     /**
      * @var string

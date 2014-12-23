@@ -16,36 +16,49 @@ $definitions = array(
     TagDefinition::create('br', true),
     TagDefinition::create('div', false),
     TagDefinition::create('img', true),
+    TagDefinition::create('pre', false, array('br', 'div'))
 );
 
 $testSet = array(
     array(
-        'in'=>'123',
-        'out'=>'123'
+        'in'  => '123',
+        'out' => '123'
     ),
     array(
-        'in'=>'[br]',
-        'out'=>'<br>'
+        'in'  => '[br]',
+        'out' => '<br>'
     ),
     array(
-        'in'=>'[/br]',
-        'out'=>'[/br]'
+        'in'  => '[/br]',
+        'out' => '[/br]'
     ),
     array(
-        'in'=>'[img src="http://www.bild.de"]',
-        'out'=>'<img src="http://www.bild.de">'
+        'in'  => '[img src="http://www.bild.de"]',
+        'out' => '<img src="http://www.bild.de">'
     ),
     array(
-        'in'=>'[alf]',
-        'out'=>'[alf]'
+        'in'  => '[alf]',
+        'out' => '[alf]'
     ),
     array(
-        'in'=>'[div]test[/div]',
-        'out'=>'<div>test</div>'
+        'in'  => '[div]test[/div]',
+        'out' => '<div>test</div>'
     ),
     array(
-        'in'=>'[div][div]gwe[/div]test',
-        'out'=>'<div><div>gwe</div>test</div>'
+        'in'  => ' [div][div] gw[br] e[/div]test ',
+        'out' => ' <div><div> gw<br> e</div>test </div>'
+    ),
+    array(
+        'in'  => ' [pre][div] gw[br] [/div]test',
+        'out' => ' <pre>[div] gw[br] [/div]test</pre>'
+    ),
+    array(
+        'in'  => ' [pre][div] gw[br] [/div]test[/pre]alal[br]off',
+        'out' => ' <pre>[div] gw[br] [/div]test</pre>alal<br>off'
+    ),
+    array(
+        'in'  => '[div]x[br]x[/div]',
+        'out' => '<div>x<br>x</div>'
     ),
 );
 
