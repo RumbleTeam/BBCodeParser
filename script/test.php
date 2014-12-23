@@ -53,6 +53,7 @@ $parser = new BBCodeParser($definitions);
 
 $successCount = 0;
 $failureCount = 0;
+$failures = '';
 foreach ($testSet as $test)
 {
     $result = $parser->parse($test['in']);
@@ -63,15 +64,21 @@ foreach ($testSet as $test)
     else
     {
         $failureCount++;
+        $failures .= "In: '{$test['in']}', Out: '{$result}', Exp.: '{$test['out']}'" . PHP_EOL;
     }
 }
 
 echo 'Success: ' . $successCount . PHP_EOL;
 echo 'Failure: ' . $failureCount . PHP_EOL;
+if ($failureCount>0)
+{
+    echo 'Failures: ' . PHP_EOL . $failures;
+
+}
 
 $start = microtime(true);
 
-$i = 100000;
+$i = 10000;
 while ($i > 0)
 {
     foreach ($testSet as $test)
@@ -86,4 +93,4 @@ while ($i > 0)
 
 $end = microtime(true);
 
-echo 'Time for 100000 runs:    ' . ($end-$start) . PHP_EOL;
+echo 'Time for 10000 runs:    ' . ($end-$start) . PHP_EOL;

@@ -14,7 +14,7 @@ interface TagDefinitionInterface
     /**
      * @return string
      */
-    public function getName();
+    public function getId();
 
     /**
      * @return bool
@@ -22,10 +22,11 @@ interface TagDefinitionInterface
     public function isVoid();
 
     /**
+     * @param string $name
      * @param string $value
      * @param array $attributes
      * @param string $content
      * @return string
      */
-    public function render($value = '', $attributes = array(), $content = '');
+    public function render($name, $value = '', $attributes = array(), $content = '');
 }

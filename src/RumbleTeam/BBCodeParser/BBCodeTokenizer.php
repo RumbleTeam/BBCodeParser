@@ -74,6 +74,11 @@ class BBCodeTokenizer
             . ')*)?\s*(?<SELF_CLOSING>\/)?\]/S';
     }
 
+    /**
+     * Creates and returns a singleton instance of the BBCode Tokenizer.
+     *
+     * @return BBCodeTokenizer
+     */
     public static function instance()
     {
         if (self::$instance === null)
@@ -85,6 +90,8 @@ class BBCodeTokenizer
     }
 
     /**
+     * Runs tokenizing on the given input.
+     *
      * @param string $input
      * @return string[] stack of text-token
      */

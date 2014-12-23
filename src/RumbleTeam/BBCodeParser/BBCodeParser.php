@@ -28,7 +28,7 @@ class BBCodeParser
         $definitions = array();
         foreach ($bbCodeDefinitions as $definition)
         {
-            $definitions[Token::getIdForName($definition->getName())] = $definition;
+            $definitions[Token::getIdForName($definition->getId())] = $definition;
         }
 
         $this->definitions = $definitions;
@@ -69,42 +69,43 @@ class BBCodeParser
             ) {
                 /** @var TagDefinitionInterface $definition */
                 $definition = $this->definitions[$tokenId];
-                if ($definition->isVoid())
+                $isVoid = $definition->isVoid();
+                switch ($tokenType)
                 {
-                    switch ($tokenType)
-                    {
-                        case Token::TYPE_TAG_OPENING:
-                        case Token::TYPE_TAG_SELF_CLOSING:
-                            $parent->add(new TagNode($token, $definition));
-                            break;
-                        default:
-                            $parent->add(new TextNode($token));
-                    }
-                }
-                else
-                {
-                    switch ($tokenType)
-                    {
-                        case Token::TYPE_TAG_OPENING:
-                            $newNode = new TagNode($token, $definition);
-                            $parent->add($newNode);
+                    case Token::TYPE_TAG_OPENING:
+                        // New opening tag, ad it to the parent,
+                        // then use the new node as parent until
+                        // the correct closing tag shows up.
+                        $newNode = new TagNode($token, $definition);
+                        $parent->add($newNode);
+                        if (!$isVoid)
+                        {
                             $parent = $newNode;
-                            break;
-                        case Token::TYPE_TAG_CLOSING:
-                            if ($parent instanceof TagNode
-                                && $parent->hasParent()
-                                && $parent->getToken()->getId() == $tokenId
-                            ) {
-                                $parent = $parent->getParent();
-                            }
-                            else
-                            {
-                                $parent->add(new TextNode($token));
-                            }
-                            break;
-                        default:
+                        }
+                        break;
+                    case Token::TYPE_TAG_SELF_CLOSING:
+                        // normal node, but has no content.
+                        $parent->add(new TagNode($token, $definition));
+                        break;
+                    case Token::TYPE_TAG_CLOSING:
+                        // check if the tag matches the current parent.
+                        // If so, an opened tag is closed. We can now
+                        // use the parent of the formerly opened tag again
+                        // to proceed.
+                        if (!$isVoid
+                            && $parent instanceof TagNode
+                            && $parent->hasParent()
+                            && $parent->getToken()->getId() == $tokenId
+                        ) {
+                            $parent = $parent->getParent();
+                        }
+                        else
+                        {
                             $parent->add(new TextNode($token));
-                    }
+                        }
+                        break;
+                    default:
+                        $parent->add(new TextNode($token));
                 }
             }
             else

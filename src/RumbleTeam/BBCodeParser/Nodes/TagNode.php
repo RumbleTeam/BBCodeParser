@@ -56,6 +56,7 @@ class TagNode extends ContainerNode
     function render()
     {
         return $this->definition->render(
+            $this->token->getName(),
             $this->token->getValue(),
             $this->token->getAttributes(),
             parent::render()

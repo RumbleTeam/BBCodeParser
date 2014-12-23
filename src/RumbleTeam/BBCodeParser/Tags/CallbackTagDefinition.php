@@ -17,26 +17,25 @@ class CallbackTagDefinition extends TagDefinition
     private $callback;
 
     /**
-     * @param string $name
+     * @param string $id
      * @param bool $void
      * @param callable $renderCallback name/value/attributes/content
      */
-    public function __construct($name, $void, \Closure $renderCallback)
+    public function __construct($id, $void, \Closure $renderCallback)
     {
-        parent::__construct($name, $void);
-
+        parent::__construct($id, $void);
         $this->callback = $renderCallback;
     }
 
     /**
+     * @param string $name
      * @param string $value
      * @param array $attributes
      * @param string $content
      * @return string
      */
-    public function render($value = '', $attributes = array(), $content = '')
+    public function render($name, $value = '', $attributes = array(), $content = '')
     {
-        $name = $this->getName();
         $renderFunction = $this->callback;
         $renderFunction($name, $value, $attributes, $content);
     }

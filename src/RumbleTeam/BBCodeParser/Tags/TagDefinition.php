@@ -14,7 +14,7 @@ class TagDefinition implements TagDefinitionInterface
     /**
      * @var string
      */
-    private $name;
+    private $id;
 
     /**
      * @var bool
@@ -22,26 +22,26 @@ class TagDefinition implements TagDefinitionInterface
     private $void;
 
     /**
-     * @param string $name
+     * @param string $id
      * @param bool $void
      */
-    public function __construct($name, $void = false)
+    public function __construct($id, $void = false)
     {
-        $this->name = $name;
+        $this->id = $id;
         $this->void = $void;
     }
 
-    public static function create($name, $void = false)
+    public static function create($id, $void = false)
     {
-        return new TagDefinition($name, $void);
+        return new TagDefinition($id, $void);
     }
 
     /**
      * @return string
      */
-    public function getName()
+    public function getId()
     {
-        return $this->name;
+        return $this->id;
     }
 
     /**
@@ -53,27 +53,28 @@ class TagDefinition implements TagDefinitionInterface
     }
 
     /**
+     * @param string $name
      * @param string $value
      * @param array $attributes
      * @param string $content
      * @return string
      */
-    public function render($value = '', $attributes = array(), $content = '')
+    public function render($name, $value = '', $attributes = array(), $content = '')
     {
         $result = '';
 
-        $result .= '<' . $this->getName();
+        $result .= '<' . $this->id;
 
-        foreach ($attributes as $key=>$value)
+        foreach ($attributes as $key => $value)
         {
             $result .= ' ' . $key . '="' . $value . '"';
         }
 
         $result .= '>';
 
-        if (!$this->isVoid())
+        if (!$this->void)
         {
-            $result .= $content . '</' . $this->getName() . '>';
+            $result .= $content . '</' . $this->id . '>';
         }
 
         return $result;
