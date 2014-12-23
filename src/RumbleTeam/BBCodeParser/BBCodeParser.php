@@ -43,20 +43,11 @@ class BBCodeParser
     {
         $tokenizer = BBCodeTokenizer::instance();
         $tokenList = $tokenizer->tokenize($text);
-        $html = $this->directRender($tokenList);
-        //$bbCodeTree = $this->lex($tokenList);
-        //$html = $bbCodeTree->render();
+        $html = $this->render($tokenList);
         return $html;
     }
 
-    public function lex(array $tokenList)
-    {
-        $rootNode = new ContainerNode();
-        $this->buildTree($tokenList, $rootNode);
-        return $rootNode;
-    }
-
-    private function directRender(array $tokenList)
+    private function render(array $tokenList)
     {
         reset($tokenList);
         $result = '';
@@ -120,19 +111,7 @@ class BBCodeParser
                         ) {
                             $parentTag = array_pop($resultStack);
                             $lastElementPosition--;
-                            /** @var TagDefinitionInterface $parentDefinition */
-                            $parentDefinition = $parentTag[1];
-                            /** @var Token $parentToken */
-                            $parentToken = $parentTag[2];
-                            $oldResult = $parentTag[3];
-                            $oldResult .= $parentDefinition->render(
-                                $parentToken->getName(),
-                                $parentToken->getValue(),
-                                $parentToken->getAttributes(),
-                                $result
-                            );
-
-                            $result = $oldResult;
+                            $result = $this->renderParent($parentTag, $result);
                         }
                         else
                         {
@@ -150,86 +129,36 @@ class BBCodeParser
         }
         while ($token = next($tokenList));
 
+        // one while to close them all.
         while ($lastElementPosition >= 0)
         {
             $parentTag = array_pop($resultStack);
             $lastElementPosition--;
-            /** @var TagDefinitionInterface $parentDefinition */
-            $parentDefinition = $parentTag[1];
-            /** @var Token $parentToken */
-            $parentToken = $parentTag[2];
-            $oldResult = $parentTag[3];
-            $oldResult .= $parentDefinition->render(
-                $parentToken->getName(),
-                $parentToken->getValue(),
-                $parentToken->getAttributes(),
-                $result
-            );
-
-            $result = $oldResult;
+            $result = $this->renderParent($parentTag, $result);
         }
 
         return $result;
     }
 
-    private function buildTree(array $tokenList, ContainerNode $parent)
+    /**
+     * @param array $parentTagArray
+     * @param string $result
+     * @return string
+     */
+    private function renderParent($parentTagArray, $result)
     {
-        reset($tokenList);
+        /** @var TagDefinitionInterface $parentDefinition */
+        $parentDefinition = $parentTagArray[1];
+        /** @var Token $parentToken */
+        $parentToken = $parentTagArray[2];
+        $parentResult = $parentTagArray[3];
+        $parentResult .= $parentDefinition->render(
+            $parentToken->getName(),
+            $parentToken->getValue(),
+            $parentToken->getAttributes(),
+            $result
+        );
 
-        /** @var $token Token */
-        $token = current($tokenList);
-
-        do
-        {
-            if ($isTag = Token::isTagType($tokenType = $token->getType())
-                && isset($this->definitions[$tokenId = $token->getId()])
-            ) {
-                /** @var TagDefinitionInterface $definition */
-                $definition = $this->definitions[$tokenId];
-                $isVoid = $definition->isVoid();
-                switch ($tokenType)
-                {
-                    case Token::TYPE_TAG_OPENING:
-                        // New opening tag, ad it to the parent,
-                        // then use the new node as parent until
-                        // the correct closing tag shows up.
-                        $newNode = new TagNode($token, $definition);
-                        $parent->add($newNode);
-                        if (!$isVoid)
-                        {
-                            $parent = $newNode;
-                        }
-                        break;
-                    case Token::TYPE_TAG_SELF_CLOSING:
-                        // normal node, but has no content.
-                        $parent->add(new TagNode($token, $definition));
-                        break;
-                    case Token::TYPE_TAG_CLOSING:
-                        // check if the tag matches the current parent.
-                        // If so, an opened tag is closed. We can now
-                        // use the parent of the formerly opened tag again
-                        // to proceed.
-                        if (!$isVoid
-                            && $parent instanceof TagNode
-                            && $parent->hasParent()
-                            && $parent->getToken()->getId() == $tokenId
-                        ) {
-                            $parent = $parent->getParent();
-                        }
-                        else
-                        {
-                            $parent->add(new TextNode($token));
-                        }
-                        break;
-                    default:
-                        $parent->add(new TextNode($token));
-                }
-            }
-            else
-            {
-                $parent->add(new TextNode($token));
-            }
-        }
-        while ($token = next($tokenList));
+        return $parentResult;
     }
 }

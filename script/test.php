@@ -78,7 +78,7 @@ if ($failureCount>0)
 
 $start = microtime(true);
 
-$i = 10000;
+$i = 100000;
 while ($i > 0)
 {
     foreach ($testSet as $test)
@@ -93,4 +93,4 @@ while ($i > 0)
 
 $end = microtime(true);
 
-echo 'Time for 10000 runs:    ' . ($end-$start) . PHP_EOL;
+echo 'Time for 100000 runs:    ' . ($end-$start) . PHP_EOL;
