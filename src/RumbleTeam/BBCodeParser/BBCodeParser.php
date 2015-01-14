@@ -15,6 +15,7 @@ class BBCodeParser
      * @var array
      */
     private $definitions;
+
     /**
      * @var int
      */
@@ -54,6 +55,12 @@ class BBCodeParser
         return $html;
     }
 
+    /**
+     * Direct rendering of all the tokens
+     *
+     * @param array $tokenList
+     * @return string
+     */
     private function render(array $tokenList)
     {
         reset($tokenList);
@@ -141,6 +148,9 @@ class BBCodeParser
     }
 
     /**
+     * Renders the tag which is one level above the current
+     * content, thus enclosing the content
+     *
      * @param array $parentTagArray
      * @param string $result
      * @return string
