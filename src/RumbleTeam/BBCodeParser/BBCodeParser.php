@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Christian.Seidlitz
+ * @Author Christian Seidlitz
  * Date: 17.12.2014
  * Time: 15:46
  */
