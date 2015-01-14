@@ -15,11 +15,16 @@ class BBCodeParser
      * @var array
      */
     private $definitions;
+    /**
+     * @var int
+     */
+    private $maxCodes;
 
     /**
      * @param TagDefinitionInterface[] $bbCodeDefinitions
+     * @param int $maxCodes
      */
-    public function __construct(array $bbCodeDefinitions)
+    public function __construct(array $bbCodeDefinitions, $maxCodes = 0)
     {
         $definitions = array();
         foreach ($bbCodeDefinitions as $definition)
@@ -28,17 +33,23 @@ class BBCodeParser
         }
 
         $this->definitions = $definitions;
+        $this->maxCodes = $maxCodes;
     }
 
     /**
      * @param string $text
      *
+     * @param int $maxCodes
      * @return string html
      */
-    public function parse($text)
+    public function parse($text, $maxCodes = 0)
     {
+        $maxCodes = (($maxCodes > 0) && ($maxCodes < $this->maxCodes))
+            ? $maxCodes
+            : $this->maxCodes;
+
         $tokenizer = BBCodeTokenizer::instance();
-        $tokenList = $tokenizer->tokenize($text);
+        $tokenList = $tokenizer->tokenize($text, $maxCodes);
         $html = $this->render($tokenList);
         return $html;
     }

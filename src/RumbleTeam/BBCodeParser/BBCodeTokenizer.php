@@ -92,9 +92,10 @@ class BBCodeTokenizer
      * Runs tokenizing on the given input.
      *
      * @param string $input
-     * @return string[] stack of text-token
+     * @param int $maxCodes The maximum number of bb codes to find
+     * @return \string[] stack of text-token
      */
-    public function tokenize($input)
+    public function tokenize($input, $maxCodes = 0)
     {
         $matchCount = preg_match_all(
             $this->tagRegex,
@@ -111,9 +112,12 @@ class BBCodeTokenizer
         }
         else
         {
+            $foundCodes = 0;
             $endOfLastMatch = 0;
             foreach ($matches as $match)
             {
+                $foundCodes ++;
+
                 $fullMatch = $match[0][0];
                 $position = $match[0][1];
                 $length = strlen($fullMatch);
@@ -128,35 +132,42 @@ class BBCodeTokenizer
 
                 $endOfLastMatch = $endPosition;
 
-                $name = $match['NAME'][0];
-                $closing = !empty($match['CLOSING'][0]);
-                $selfClosing = !empty($match['SELF_CLOSING'][0]);
-
-                if (isset($match['VALUE_QUOTED']))
+                if ($maxCodes > 0 && $foundCodes > $maxCodes)
                 {
-                    $value = $match['VALUE_QUOTED'][0];
+                    self::addToken($tokenList, $fullMatch);
                 }
                 else
                 {
-                    $value = $match['VALUE'][0];
-                }
+                    $name = $match['NAME'][0];
+                    $closing = !empty($match['CLOSING'][0]);
+                    $selfClosing = !empty($match['SELF_CLOSING'][0]);
 
-                $attributes = array();
-                $attributesText = trim($match['ATTRIBUTES'][0]);
-                if (!$closing && !empty($attributesText))
-                {
-                    $attributes = self::parseAttributes($attributesText);
-                }
+                    if (isset($match['VALUE_QUOTED']))
+                    {
+                        $value = $match['VALUE_QUOTED'][0];
+                    }
+                    else
+                    {
+                        $value = $match['VALUE'][0];
+                    }
 
-                self::addToken(
-                    $tokenList,
-                    $fullMatch,
-                    $name,
-                    $value,
-                    $attributes,
-                    $closing,
-                    $selfClosing
-                );
+                    $attributes = array();
+                    $attributesText = trim($match['ATTRIBUTES'][0]);
+                    if (!$closing && !empty($attributesText))
+                    {
+                        $attributes = self::parseAttributes($attributesText);
+                    }
+
+                    self::addToken(
+                        $tokenList,
+                        $fullMatch,
+                        $name,
+                        $value,
+                        $attributes,
+                        $closing,
+                        $selfClosing
+                    );
+                }
             }
 
             $endOfInput = strlen($input);
@@ -183,7 +194,6 @@ class BBCodeTokenizer
      */
     private function parseAttributes($text)
     {
-
         $attributes = array();
         if (!empty($text))
         {
