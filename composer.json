@@ -1,0 +1,17 @@
+{
+  "name": "RumbleTeam/BBCodeParser",
+  "type": "library",
+  "description": "BBCode Parsing and Rendering",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Christian Seidlitz",
+      "email": "Christian.Seidlitz@gmx.de"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "RumbleTeam": "src"
+    }
+  }
+}
