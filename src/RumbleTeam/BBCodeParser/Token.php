@@ -12,6 +12,13 @@ use RumbleTeam\BBCodeParser\Tags\TagInterface;
 
 class Token implements TagInterface
 {
+
+    const TYPE_UNDEFINED = 'undefined';
+    const TYPE_TEXT = 'text';
+    const TYPE_TAG_OPENING = 'opening';
+    const TYPE_TAG_CLOSING = 'closing';
+    const TYPE_TAG_SELF_CLOSING = 'selfClosing';
+
     /**
      * @var string
      */
@@ -36,12 +43,6 @@ class Token implements TagInterface
      * @var string
      */
     private $type = self::TYPE_UNDEFINED;
-
-    const TYPE_UNDEFINED = 'undefined';
-    const TYPE_TEXT = 'text';
-    const TYPE_TAG_OPENING = 'opening';
-    const TYPE_TAG_CLOSING = 'closing';
-    const TYPE_TAG_SELF_CLOSING = 'selfClosing';
 
     /**
      * @param string $match
