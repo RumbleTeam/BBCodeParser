@@ -1,5 +1,5 @@
 {
-  "name": "RumbleTeam/BBCodeParser",
+  "name": "rumble-team/bb-code-parser",
   "type": "library",
   "description": "BBCode Parsing and Rendering",
   "license": "MIT",
