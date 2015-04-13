@@ -13,12 +13,19 @@ use RumbleTeam\BBCodeParser\Tags\TagDefinition;
 use RumbleTeam\BBCodeParser\Tags\TestTagDefinition;
 
 $definitions = array(
+    TestTagDefinition::create('a'),
+    TestTagDefinition::create('b'),
+    TestTagDefinition::create('c'),
+
     TagDefinition::create('br', true),
     TagDefinition::create('div', false),
     TagDefinition::create('img', true),
+
     TestTagDefinition::create('url', false, array('url')),
     TestTagDefinition::create('xrl', true, array('url')),
+
     TagDefinition::create('pre', false, array('br', 'div')),
+
     TestTagDefinition::create('fnt', false),
     TestTagDefinition::create('xfont', true),
 );
@@ -107,6 +114,10 @@ $testSet = array(
     array(
         'in' => '[xFONT=comic sans ms]',
         'out' => '<xfont="comic sans ms">'
+    ),
+    array(
+        'in'  => '[a=orange][b][c=15]c15ba[/c][/b][/a]',
+        'out' => '<a="orange"><b><c="15">c15ba</c></b></a>'
     ),
 );
 
