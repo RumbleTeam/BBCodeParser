@@ -31,37 +31,21 @@ class BBCodeTokenizer
     private function __construct()
     {
         $unnamedNameRegex = '\w+[\d\w]*';
-        $regexSymbols = '\d\w_,.?!@#$%&*()^=:\+\-\'';
-        $quotedSymbols = '\s\/' . $regexSymbols;
+        $regexSymbols = '\/\d\w_,.?!@#$%&*()^=:\+\-\'';
+        $quotedSymbols = '\s' . $regexSymbols;
         $namedNameRegex = '(?<NAME>' . $unnamedNameRegex . ')';
 
         $unnamedValueRegex =
-            '(?:\"['
-            . $quotedSymbols
-            . ']*\"|['
-            . $regexSymbols
-            . ']*)';
+            '(?:\"[' . $quotedSymbols . ']*\"|[' . $regexSymbols . ']*)';
 
         $namedValueRegex =
-            '(?:\"(?<QUOTED_VALUE>['
-            . $quotedSymbols
-            . ']*)\"|(?<VALUE>['
-            . $regexSymbols
-            . ']*))';
+            '(?:\"(?<QUOTED_VALUE>[' . $quotedSymbols . ']*)\"|(?<VALUE>[' . $regexSymbols . ']*))';
 
         $unnamedAttributesRegex =
-            '(?:'
-            . $unnamedNameRegex
-            . '\s*\=\s*'
-            . $unnamedValueRegex
-            . ')';
+            '(?:' . $unnamedNameRegex . '\s*\=\s*' . $unnamedValueRegex . ')';
 
         $this->attributeRegex =
-            '/'
-            . $namedNameRegex
-            . '\s*\=\s*'
-            . $namedValueRegex
-            . '/S';
+            '/' . $namedNameRegex . '\s*\=\s*' . $namedValueRegex . '/S';
 
         $this->tagRegex =
             '/\[(?<CLOSING>\/?)'
@@ -142,11 +126,12 @@ class BBCodeTokenizer
                     $closing = !empty($match['CLOSING'][0]);
                     $selfClosing = !empty($match['SELF_CLOSING'][0]);
 
-                    if (isset($match['VALUE_QUOTED']))
+                    $value = '';
+                    if (!empty($match['VALUE_QUOTED'][0]))
                     {
                         $value = $match['VALUE_QUOTED'][0];
                     }
-                    else
+                    else if (!empty($match['VALUE'][0]))
                     {
                         $value = $match['VALUE'][0];
                     }
@@ -206,11 +191,12 @@ class BBCodeTokenizer
 
             foreach ($matches as $match)
             {
-                if (isset($match['QUOTED_VALUE']))
+                $value = '';
+                if (!empty($match['QUOTED_VALUE']))
                 {
                     $value = $match['QUOTED_VALUE'];
                 }
-                else
+                else if (!empty($match['VALUE']))
                 {
                     $value = $match['VALUE'];
                 }

@@ -84,7 +84,7 @@ class TagDefinition implements TagDefinitionInterface
 
         $result .= '>';
 
-        if (!$this->void)
+        if (!$this->void && !$tag->isSelfClosing())
         {
             $result .= $content . '</' . $this->id . '>';
         }
