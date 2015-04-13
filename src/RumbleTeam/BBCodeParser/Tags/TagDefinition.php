@@ -19,6 +19,7 @@ class TagDefinition implements TagDefinitionInterface
      * @var bool
      */
     private $void;
+
     /**
      * @var array
      */
