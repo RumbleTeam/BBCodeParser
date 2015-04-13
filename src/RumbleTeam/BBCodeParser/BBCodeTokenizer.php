@@ -35,26 +35,36 @@ class BBCodeTokenizer
         $quotedSymbols = '\s' . $regexSymbols;
         $namedNameRegex = '(?<NAME>' . $unnamedNameRegex . ')';
 
+        // non matching regex that matches attribute values (for embedding in tag match)
         $unnamedValueRegex =
             '(?:\"[' . $quotedSymbols . ']*\"|[' . $regexSymbols . ']*)';
 
+        // matching regex that matches attribute values
         $namedValueRegex =
             '(?:\"(?<QUOTED_VALUE>[' . $quotedSymbols . ']*)\"|(?<VALUE>[' . $regexSymbols . ']*))';
 
+        // non matching regex that matches an attribute (for embedding in tag match)
         $unnamedAttributesRegex =
             '(?:' . $unnamedNameRegex . '\s*\=\s*' . $unnamedValueRegex . ')';
 
+        // matching regex that matches an attribute
         $this->attributeRegex =
             '/' . $namedNameRegex . '\s*\=\s*' . $namedValueRegex . '/S';
 
+        // option where the value regex is quoted with spaces or unquoted without spaces and optional attributes following
+        // [font="a b c" x=1] -> value = 'a b c'
+        // [font=abc x=1]     -> value = 'abc'
+        $quotedValueWithSpaceOption = '(?:\s*\=\s*' . $namedValueRegex . ')?'
+            . '(?<ATTRIBUTES>(?:\s+' . $unnamedAttributesRegex . ')+)?';
+
+        // option where the value regex is not quoted but has or has not spaces but no attributes following
+        // [font=a b c] -> value = 'a b c'
+        $unquotedValueWithSpaceOption = '(?:\s*\=\s*(?<UNQUOTED_VALUE>[' . $quotedSymbols . ']*))?';
+
         $this->tagRegex =
             '/\[(?<CLOSING>\/?)'
-            . $namedNameRegex
-            . '(?:\s*\=\s*'
-            . $namedValueRegex
-            . ')?(?<ATTRIBUTES>(?:\s+'
-            . $unnamedAttributesRegex
-            . ')*)?\s*(?<SELF_CLOSING>\/)?\]/S';
+            . $namedNameRegex . '(?:' . $quotedValueWithSpaceOption . '|' . $unquotedValueWithSpaceOption . ')'
+            . '\s*(?<SELF_CLOSING>\/)??\]/S';
     }
 
     /**
@@ -127,13 +137,17 @@ class BBCodeTokenizer
                     $selfClosing = !empty($match['SELF_CLOSING'][0]);
 
                     $value = '';
-                    if (!empty($match['VALUE_QUOTED'][0]))
+                    if (!empty($match['QUOTED_VALUE'][0]))
                     {
-                        $value = $match['VALUE_QUOTED'][0];
+                        $value = $match['QUOTED_VALUE'][0];
                     }
                     else if (!empty($match['VALUE'][0]))
                     {
                         $value = $match['VALUE'][0];
+                    }
+                    else if (!empty($match['UNQUOTED_VALUE'][0]))
+                    {
+                        $value = $match['UNQUOTED_VALUE'][0];
                     }
 
                     $attributes = array();

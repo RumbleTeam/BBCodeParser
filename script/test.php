@@ -10,14 +10,17 @@ spl_autoload_register();
 
 use RumbleTeam\BBCodeParser\BBCodeParser;
 use RumbleTeam\BBCodeParser\Tags\TagDefinition;
+use RumbleTeam\BBCodeParser\Tags\TestTagDefinition;
 
 $definitions = array(
     TagDefinition::create('br', true),
     TagDefinition::create('div', false),
     TagDefinition::create('img', true),
-    TagDefinition::create('url', false, array('url')),
-    TagDefinition::create('xrl', true, array('url')),
-    TagDefinition::create('pre', false, array('br', 'div'))
+    TestTagDefinition::create('url', false, array('url')),
+    TestTagDefinition::create('xrl', true, array('url')),
+    TagDefinition::create('pre', false, array('br', 'div')),
+    TestTagDefinition::create('fnt', false),
+    TestTagDefinition::create('xfont', true),
 );
 
 $testSet = array(
@@ -34,7 +37,11 @@ $testSet = array(
         'out' => '[/br]'
     ),
     array(
-        'in'  => '[img src="http://www.bild.de"]',
+        'in' => '[img src="http://www.bild.de"]',
+        'out' => '<img src="http://www.bild.de">'
+    ),
+    array(
+        'in' => '[img src=http://www.bild.de]',
         'out' => '<img src="http://www.bild.de">'
     ),
     array(
@@ -63,35 +70,43 @@ $testSet = array(
     ),
     array(
         'in' => '[url=http://www.asdf.com/bla/ a=tfd b="asd" c=asd /]',
-        'out' => '<url a="tfd" b="asd" c="asd">'
+        'out' => '<url="http://www.asdf.com/bla/" a="tfd" b="asd" c="asd">'
     ),
     array(
         'in' => '[url=http://www.asdf.com/bla/ a=tfd b="asd" c="asd"/]',
-        'out' => '<url a="tfd" b="asd" c="asd">'
+        'out' => '<url="http://www.asdf.com/bla/" a="tfd" b="asd" c="asd">'
     ),
     array(
         'in' => '[url="http://www.asdf.com/bla/"/]',
-        'out' => '<url>'
+        'out' => '<url="http://www.asdf.com/bla/">'
     ),
     array(
         'in' => '[url=http://www.asdf.com/bla/]',
-        'out' => '<url></url>'
+        'out' => '<url="http://www.asdf.com/bla/"></url>'
     ),
     array(
         'in' => '[xrl=http://www.asdf.com/bla/ a=tfd b="asd" c=asd]',
-        'out' => '<xrl a="tfd" b="asd" c="asd">'
+        'out' => '<xrl="http://www.asdf.com/bla/" a="tfd" b="asd" c="asd">'
     ),
     array(
         'in' => '[xrl=http://www.asdf.com/bla/ a=tfd b="asd" c="asd"/]',
-        'out' => '<xrl a="tfd" b="asd" c="asd">'
+        'out' => '<xrl="http://www.asdf.com/bla/" a="tfd" b="asd" c="asd">'
     ),
     array(
         'in' => '[xrl="http://www.asdf.com/bla/"]',
-        'out' => '<xrl>'
+        'out' => '<xrl="http://www.asdf.com/bla/">'
     ),
     array(
         'in' => '[xrl=http://www.asdf.com/bla/]',
-        'out' => '<xrl>'
+        'out' => '<xrl="http://www.asdf.com/bla/">'
+    ),
+    array(
+        'in' => '[FNT=comic sans ms]sdfs[/FNT]',
+        'out' => '<fnt="comic sans ms">sdfs</fnt>'
+    ),
+    array(
+        'in' => '[xFONT=comic sans ms]',
+        'out' => '<xfont="comic sans ms">'
     ),
 );
 
@@ -125,7 +140,7 @@ if ($failureCount>0)
 $start = microtime(true);
 
 $limit = 100000;
-$limit = 0;
+//$limit = 0;
 $i = $limit;
 while ($i > 0)
 {
