@@ -121,4 +121,12 @@ class Token implements TagInterface
     {
         return $this->attributes;
     }
+
+    /**
+     * @return bool
+     */
+    public function isSelfClosing()
+    {
+        return $this->type === self::TYPE_TAG_SELF_CLOSING;
+    }
 }

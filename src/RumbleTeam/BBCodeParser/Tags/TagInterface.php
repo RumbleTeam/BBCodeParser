@@ -13,4 +13,5 @@ interface TagInterface
     public function getName();
     public function getValue();
     public function getAttributes();
+    public function isSelfClosing();
 }

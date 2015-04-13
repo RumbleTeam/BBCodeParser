@@ -15,6 +15,8 @@ $definitions = array(
     TagDefinition::create('br', true),
     TagDefinition::create('div', false),
     TagDefinition::create('img', true),
+    TagDefinition::create('url', false, array('url')),
+    TagDefinition::create('xrl', true, array('url')),
     TagDefinition::create('pre', false, array('br', 'div'))
 );
 
@@ -56,8 +58,40 @@ $testSet = array(
         'out' => ' <pre>[div] gw[br] [/div]test</pre>alal<br>off'
     ),
     array(
-        'in'  => '[div]x[br]x[/div]',
+        'in' => '[div]x[br]x[/div]',
         'out' => '<div>x<br>x</div>'
+    ),
+    array(
+        'in' => '[url=http://www.asdf.com/bla/ a=tfd b="asd" c=asd /]',
+        'out' => '<url a="tfd" b="asd" c="asd">'
+    ),
+    array(
+        'in' => '[url=http://www.asdf.com/bla/ a=tfd b="asd" c="asd"/]',
+        'out' => '<url a="tfd" b="asd" c="asd">'
+    ),
+    array(
+        'in' => '[url="http://www.asdf.com/bla/"/]',
+        'out' => '<url>'
+    ),
+    array(
+        'in' => '[url=http://www.asdf.com/bla/]',
+        'out' => '<url></url>'
+    ),
+    array(
+        'in' => '[xrl=http://www.asdf.com/bla/ a=tfd b="asd" c=asd]',
+        'out' => '<xrl a="tfd" b="asd" c="asd">'
+    ),
+    array(
+        'in' => '[xrl=http://www.asdf.com/bla/ a=tfd b="asd" c="asd"/]',
+        'out' => '<xrl a="tfd" b="asd" c="asd">'
+    ),
+    array(
+        'in' => '[xrl="http://www.asdf.com/bla/"]',
+        'out' => '<xrl>'
+    ),
+    array(
+        'in' => '[xrl=http://www.asdf.com/bla/]',
+        'out' => '<xrl>'
     ),
 );
 
@@ -90,7 +124,9 @@ if ($failureCount>0)
 
 $start = microtime(true);
 
-$i = 100000;
+$limit = 100000;
+$limit = 0;
+$i = $limit;
 while ($i > 0)
 {
     foreach ($testSet as $test)
@@ -104,5 +140,6 @@ while ($i > 0)
 }
 
 $end = microtime(true);
-
-echo 'Time for 100000 runs:    ' . ($end-$start) . PHP_EOL;
+if ($limit > 0) {
+    echo 'Time for ' . $limit . ' runs:    ' . ($end - $start) . PHP_EOL;
+}
