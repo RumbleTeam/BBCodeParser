@@ -151,7 +151,13 @@ class BBCodeTokenizer
                     }
 
                     $attributes = array();
-                    $attributesText = trim($match['ATTRIBUTES'][0]);
+
+                    $attributesText = '';
+                    if (!empty($match['ATTRIBUTES']))
+                    {
+                        $attributesText = trim($match['ATTRIBUTES'][0]);
+                    }
+
                     if (!$closing && !empty($attributesText))
                     {
                         $attributes = self::parseAttributes($attributesText);
