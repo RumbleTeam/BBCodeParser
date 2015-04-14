@@ -1,17 +1,20 @@
 {
-  "name": "rumbleteam/bbcodeparser",
-  "type": "library",
-  "description": "BBCode Parsing and Rendering",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Christian Seidlitz",
-      "email": "Christian.Seidlitz@gmx.de"
+    "name": "rumbleteam/bbcodeparser",
+    "type": "library",
+    "description": "BBCode Parsing and Rendering",
+    "homepage": "http://github.com/RumbleTeam/BBCodeParser",
+    "keywords": ["bbcode", "render", "parse", "board", "forum"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Seidlitz",
+            "email": "Christian.Seidlitz@gmx.de",
+            "role": "Timelord"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "RumbleTeam": "src/"
+        }
     }
-  ],
-  "autoload": {
-    "psr-0": {
-      "RumbleTeam": "src/"
-    }
-  }
 }
