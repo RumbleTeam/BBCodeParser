@@ -75,7 +75,7 @@ class BBCodeParser
         {
             if ($isTag = Token::isTagType($tokenType = $token->getType())
                 && isset($this->definitions[$tokenId = $token->getId()])
-                && $this->isLegalChild($parentStack, $tokenId)
+                //&& $this->isLegalChild($parentStack, $tokenId)
             ) {
                 /** @var TagDefinitionInterface $definition */
                 $definition = $this->definitions[$tokenId];
@@ -88,7 +88,7 @@ class BBCodeParser
                         // the correct closing tag shows up.
                         if ($isVoid)
                         {
-                            $result .= $definition->render($token);
+                            $result .= $this->renderTokenDefinition($parentStack, $definition, $token);
                         }
                         else
                         {
@@ -105,7 +105,7 @@ class BBCodeParser
                         break;
                     case Token::TYPE_TAG_SELF_CLOSING:
                         // normal node, but has no content.
-                        $result .= $definition->render($token);
+                        $result .= $this->renderTokenDefinition($parentStack, $definition, $token);
                         break;
                     case Token::TYPE_TAG_CLOSING:
                         // check if the tag matches the current parent.
@@ -118,7 +118,7 @@ class BBCodeParser
                         ) {
                             $parentTagData = array_pop($parentStack);
                             $lastElementPosition--;
-                            $result = $this->renderParent($parentTagData, $result);
+                            $result = $this->renderParent($parentStack, $parentTagData, $result, $token);
                         }
                         else
                         {
@@ -141,7 +141,7 @@ class BBCodeParser
         {
             $parentTagData = array_pop($parentStack);
             $lastElementPosition--;
-            $result = $this->renderParent($parentTagData, $result);
+            $result = $this->renderParent($parentStack, $parentTagData, $result);
         }
 
         return $result;
@@ -151,20 +151,48 @@ class BBCodeParser
      * Renders the tag which is one level above the current
      * content, thus enclosing the content
      *
+     * @param array $parentStack
      * @param array $parentTagData
-     * @param string $result
+     * @param string $content
+     * @param Token $closingToken
      * @return string
      */
-    private function renderParent($parentTagData, $result)
+    private function renderParent(array $parentStack, $parentTagData, $content, Token $closingToken = null)
     {
-        /** @var TagDefinitionInterface $parentDefinition */
-        $parentDefinition = $parentTagData[1];
-        /** @var Token $parentToken */
-        $parentToken = $parentTagData[2];
-        $parentResult = $parentTagData[3];
-        $parentResult .= $parentDefinition->render($parentToken, $result);
+        /** @var TagDefinitionInterface $definition */
+        $definition = $parentTagData[1];
 
-        return $parentResult;
+        /** @var Token $openingToken */
+        $openingToken = $parentTagData[2];
+
+        /** @var string $parentResultState */
+        $parentResultState = $parentTagData[3];
+
+        // Append the rendering result of the current parent to the original result, then return the whole.
+        $parentResultState .= $this->renderTokenDefinition($parentStack, $definition, $openingToken, $content, $closingToken);
+
+        return $parentResultState;
+    }
+
+    private function renderTokenDefinition(array $parentStack, TagDefinitionInterface $definition, Token $openingToken, $content = '', Token $closingToken = null)
+    {
+        $result = '';
+
+        if ($this->isLegalChild($parentStack, $definition->getId()))
+        {
+            $result .= $definition->render($openingToken, $content);
+        }
+        else
+        {
+            $result .= $openingToken->getMatch();
+            if ($closingToken != null)
+            {
+                $result .= $content;
+                $result .= $closingToken->getMatch();
+            }
+        }
+
+        return $result;
     }
 
     /**

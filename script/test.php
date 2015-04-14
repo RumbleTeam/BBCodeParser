@@ -28,6 +28,8 @@ $definitions = array(
 
     TestTagDefinition::create('fnt', false),
     TestTagDefinition::create('xfont', true),
+
+    TestTagDefinition::create('wrapped', false, array('wrapped')),
 );
 
 $testSet = array(
@@ -116,8 +118,20 @@ $testSet = array(
         'out' => '<xfont="comic sans ms">'
     ),
     array(
-        'in'  => '[a=orange][b][c=15]c15ba[/c][/b][/a]',
+        'in' => '[a=orange][b][c=15]c15ba[/c][/b][/a]',
         'out' => '<a="orange"><b><c="15">c15ba</c></b></a>'
+    ),
+    array(
+        'in' => '[wrapped][wrapped][a]wwaww[/a][/wrapped][/wrapped]',
+        'out' => '<wrapped>[wrapped]<a>wwaww</a>[/wrapped]</wrapped>'
+    ),
+    array(
+        'in' => '[wrapped][wrapped][a]wwaww[/a][/wrapped][/wrapped][/wrapped]',
+        'out' => '<wrapped>[wrapped]<a>wwaww</a>[/wrapped]</wrapped>[/wrapped]'
+    ),
+    array(
+        'in' => '[wrapped][wrapped][wrapped][a]wwaww[/a][/wrapped][/wrapped]',
+        'out' => '<wrapped>[wrapped][wrapped]<a>wwaww</a>[/wrapped][/wrapped]</wrapped>'
     ),
 );
 
