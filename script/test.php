@@ -29,7 +29,7 @@ $definitions = array(
     TestTagDefinition::create('fnt', false),
     TestTagDefinition::create('xfont', true),
 
-    TestTagDefinition::create('wrapped', false, array('wrapped')),
+    TagDefinition::create('wrapped', false, array('wrapped')),
 );
 
 $testSet = array(
@@ -132,6 +132,11 @@ $testSet = array(
     array(
         'in' => '[wrapped][wrapped][wrapped][a]wwaww[/a][/wrapped][/wrapped]',
         'out' => '<wrapped>[wrapped][wrapped]<a>wwaww</a>[/wrapped][/wrapped]</wrapped>'
+    ),
+    // closed tags without corresponding opening-tags on the same level being auto-closed at the end
+    array(
+        'in' => '[a][b][/a][/b][c][b][/c][/b]',
+        'out' => '<a><b>[/a]</b><c><b>[/c]</b></c></a>'
     ),
 );
 
