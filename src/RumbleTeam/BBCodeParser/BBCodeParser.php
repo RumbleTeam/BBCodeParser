@@ -116,9 +116,9 @@ class BBCodeParser
                             && $lastElementPosition >= 0
                             && $parentStack[$lastElementPosition][0] === $tokenId
                         ) {
-                            $parentTag = array_pop($parentStack);
+                            $parentTagData = array_pop($parentStack);
                             $lastElementPosition--;
-                            $result = $this->renderParent($parentTag, $result);
+                            $result = $this->renderParent($parentTagData, $result);
                         }
                         else
                         {
@@ -139,9 +139,9 @@ class BBCodeParser
         // one while to close them all.
         while ($lastElementPosition >= 0)
         {
-            $parentTag = array_pop($parentStack);
+            $parentTagData = array_pop($parentStack);
             $lastElementPosition--;
-            $result = $this->renderParent($parentTag, $result);
+            $result = $this->renderParent($parentTagData, $result);
         }
 
         return $result;
@@ -151,17 +151,17 @@ class BBCodeParser
      * Renders the tag which is one level above the current
      * content, thus enclosing the content
      *
-     * @param array $parentTagArray
+     * @param array $parentTagData
      * @param string $result
      * @return string
      */
-    private function renderParent($parentTagArray, $result)
+    private function renderParent($parentTagData, $result)
     {
         /** @var TagDefinitionInterface $parentDefinition */
-        $parentDefinition = $parentTagArray[1];
+        $parentDefinition = $parentTagData[1];
         /** @var Token $parentToken */
-        $parentToken = $parentTagArray[2];
-        $parentResult = $parentTagArray[3];
+        $parentToken = $parentTagData[2];
+        $parentResult = $parentTagData[3];
         $parentResult .= $parentDefinition->render($parentToken, $result);
 
         return $parentResult;
