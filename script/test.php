@@ -138,6 +138,10 @@ $testSet = array(
         'in' => '[a][b][/a][/b][c][b][/c][/b]',
         'out' => '<a><b>[/a]</b><c><b>[/c]</b></c></a>'
     ),
+    array(
+        'in' => '[url=http://asd.org/x.php?1&amp;2]asd[/url]',
+        'out' => '<url="http://asd.org/x.php?1&amp;2">asd</url>'
+    ),
 );
 
 $parser = new BBCodeParser($definitions);

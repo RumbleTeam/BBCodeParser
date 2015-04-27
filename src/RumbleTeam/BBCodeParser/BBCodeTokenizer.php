@@ -31,7 +31,7 @@ class BBCodeTokenizer
     private function __construct()
     {
         $unnamedNameRegex = '\w+[\d\w]*';
-        $regexSymbols = '\/\d\w_,.?!@#$%&*()^=:\+\-\'';
+        $regexSymbols = '\/\d\w_,.?!@#$%&*()^=:;\+\-\'';
         $quotedSymbols = '\s' . $regexSymbols;
         $namedNameRegex = '(?<NAME>' . $unnamedNameRegex . ')';
 
