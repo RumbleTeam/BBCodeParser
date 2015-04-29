@@ -1,7 +1,7 @@
 {
     "name": "rumbleteam/bbcodeparser",
     "type": "library",
-    "description": "BBCode Parsing and Rendering",
+    "description": "BBCode-Tag Parsing. No dependencies. Fully customizable.",
     "homepage": "http://github.com/RumbleTeam/BBCodeParser",
     "keywords": ["bbcode", "render", "parse", "board", "forum"],
     "license": "MIT",
