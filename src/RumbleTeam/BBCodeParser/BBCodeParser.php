@@ -7,6 +7,7 @@
 
 namespace RumbleTeam\BBCodeParser;
 
+use Closure;
 use RumbleTeam\BBCodeParser\Tags\TagDefinitionInterface;
 
 class BBCodeParser
@@ -20,12 +21,17 @@ class BBCodeParser
      * @var int
      */
     private $maxCodes;
+    /**
+     * @var callable
+     */
+    private $textRenderCallback;
 
     /**
      * @param TagDefinitionInterface[] $bbCodeDefinitions
      * @param int $maxCodes
+     * @param callable $textRenderCallback
      */
-    public function __construct(array $bbCodeDefinitions, $maxCodes = 0)
+    public function __construct(array $bbCodeDefinitions, $maxCodes = 0, Closure $textRenderCallback = null)
     {
         $definitions = array();
         foreach ($bbCodeDefinitions as $definition)
@@ -35,6 +41,10 @@ class BBCodeParser
 
         $this->definitions = $definitions;
         $this->maxCodes = $maxCodes;
+
+        $this->textRenderCallback = $textRenderCallback === null
+            ? function($text) {return $text;}
+            : $textRenderCallback;
     }
 
     /**
@@ -67,6 +77,7 @@ class BBCodeParser
         $result = '';
         $parentStack = array();
         $lastElementPosition = -1;
+        $renderText = $this->textRenderCallback;
 
         /** @var $token Token */
         $token = current($tokenList);
@@ -122,16 +133,16 @@ class BBCodeParser
                         }
                         else
                         {
-                            $result .= $token->getMatch();
+                            $result .= $renderText($token->getMatch());
                         }
                         break;
                     default:
-                        $result .= $token->getMatch();
+                        $result .= $renderText($token->getMatch());
                 }
             }
             else
             {
-                $result .= $token->getMatch();
+                $result .= $renderText($token->getMatch());
             }
         }
         while ($token = next($tokenList));
@@ -176,6 +187,7 @@ class BBCodeParser
 
     private function renderTokenDefinition(array $parentStack, TagDefinitionInterface $definition, Token $openingToken, $content = '', Token $closingToken = null)
     {
+        $renderText = $this->textRenderCallback;
         $result = '';
 
         if ($this->isLegalChild($parentStack, $definition->getId()))
@@ -184,11 +196,11 @@ class BBCodeParser
         }
         else
         {
-            $result .= $openingToken->getMatch();
+            $result .= $renderText($openingToken->getMatch());
             if ($closingToken != null)
             {
                 $result .= $content;
-                $result .= $closingToken->getMatch();
+                $result .= $renderText($closingToken->getMatch());
             }
         }
 

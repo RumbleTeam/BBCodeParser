@@ -35,7 +35,7 @@ $definitions = array(
 $testSet = array(
     array(
         'in'  => '123',
-        'out' => '123'
+        'out' => '§123%'
     ),
     array(
         'in'  => '[br]',
@@ -43,7 +43,7 @@ $testSet = array(
     ),
     array(
         'in'  => '[/br]',
-        'out' => '[/br]'
+        'out' => '§[/br]%'
     ),
     array(
         'in' => '[img src="http://www.bild.de"]',
@@ -55,27 +55,27 @@ $testSet = array(
     ),
     array(
         'in'  => '[alf]',
-        'out' => '[alf]'
+        'out' => '§[alf]%'
     ),
     array(
         'in'  => '[div]test[/div]',
-        'out' => '<div>test</div>'
+        'out' => '<div>§test%</div>'
     ),
     array(
         'in'  => ' [div][div] gw[br] e[/div]test ',
-        'out' => ' <div><div> gw<br> e</div>test </div>'
+        'out' => '§ %<div><div>§ gw%<br>§ e%</div>§test %</div>'
     ),
     array(
         'in'  => ' [pre][div] gw[br] [/div]test',
-        'out' => ' <pre>[div] gw[br] [/div]test</pre>'
+        'out' => '§ %<pre>§[div]%§ gw%§[br]%§ %§[/div]%§test%</pre>'
     ),
     array(
         'in'  => ' [pre][div] gw[br] [/div]test[/pre]alal[br]off',
-        'out' => ' <pre>[div] gw[br] [/div]test</pre>alal<br>off'
+        'out' => '§ %<pre>§[div]%§ gw%§[br]%§ %§[/div]%§test%</pre>§alal%<br>§off%'
     ),
     array(
         'in' => '[div]x[br]x[/div]',
-        'out' => '<div>x<br>x</div>'
+        'out' => '<div>§x%<br>§x%</div>'
     ),
     array(
         'in' => '[url=http://www.asdf.com/bla/ a=tfd b="asd" c=asd /]',
@@ -111,7 +111,7 @@ $testSet = array(
     ),
     array(
         'in' => '[FNT=comic sans ms]sdfs[/FNT]',
-        'out' => '<fnt="comic sans ms">sdfs</fnt>'
+        'out' => '<fnt="comic sans ms">§sdfs%</fnt>'
     ),
     array(
         'in' => '[xFONT=comic sans ms]',
@@ -119,28 +119,28 @@ $testSet = array(
     ),
     array(
         'in' => '[a=orange][b][c=15]c15ba[/c][/b][/a]',
-        'out' => '<a="orange"><b><c="15">c15ba</c></b></a>'
+        'out' => '<a="orange"><b><c="15">§c15ba%</c></b></a>'
     ),
     array(
         'in' => '[wrapped][wrapped][a]wwaww[/a][/wrapped][/wrapped]',
-        'out' => '<wrapped>[wrapped]<a>wwaww</a>[/wrapped]</wrapped>'
+        'out' => '<wrapped>§[wrapped]%<a>§wwaww%</a>§[/wrapped]%</wrapped>'
     ),
     array(
         'in' => '[wrapped][wrapped][a]wwaww[/a][/wrapped][/wrapped][/wrapped]',
-        'out' => '<wrapped>[wrapped]<a>wwaww</a>[/wrapped]</wrapped>[/wrapped]'
+        'out' => '<wrapped>§[wrapped]%<a>§wwaww%</a>§[/wrapped]%</wrapped>§[/wrapped]%'
     ),
     array(
         'in' => '[wrapped][wrapped][wrapped][a]wwaww[/a][/wrapped][/wrapped]',
-        'out' => '<wrapped>[wrapped][wrapped]<a>wwaww</a>[/wrapped][/wrapped]</wrapped>'
+        'out' => '<wrapped>§[wrapped]%§[wrapped]%<a>§wwaww%</a>§[/wrapped]%§[/wrapped]%</wrapped>'
     ),
     // closed tags without corresponding opening-tags on the same level being auto-closed at the end
     array(
         'in' => '[a][b][/a][/b][c][b][/c][/b]',
-        'out' => '<a><b>[/a]</b><c><b>[/c]</b></c></a>'
+        'out' => '<a><b>§[/a]%</b><c><b>§[/c]%</b></c></a>'
     ),
     array(
         'in' => '[url=http://asd.org/x.php?1&amp;2]asd[/url]',
-        'out' => '<url="http://asd.org/x.php?1&amp;2">asd</url>'
+        'out' => '<url="http://asd.org/x.php?1&amp;2">§asd%</url>'
     ),
 //    array(
 //        'in' => '[url=http://pl.xyz.com/video/?language[]=pl]xyz[/url]',
@@ -148,15 +148,22 @@ $testSet = array(
 //    ),
     array(
         'in' => '[url="http://pl.xyz.com/video/?language[]=pl"]xyz[/url]',
-        'out' => '<url="http://pl.xyz.com/video/?language[]=pl">xyz</url>'
+        'out' => '<url="http://pl.xyz.com/video/?language[]=pl">§xyz%</url>'
     ),
     array(
         'in' => '[url="http://pl.xyz.com/video/?language[]=pl" b="asd{[]}xyz"]x{}[]yz[/url]',
-        'out' => '<url="http://pl.xyz.com/video/?language[]=pl" b="asd{[]}xyz">x{}[]yz</url>'
+        'out' => '<url="http://pl.xyz.com/video/?language[]=pl" b="asd{[]}xyz">§x{}[]yz%</url>'
     ),
 );
 
-$parser = new BBCodeParser($definitions);
+$parser = new BBCodeParser(
+    $definitions,
+    0,
+    function ($text)
+    {
+        return '§' . $text . '%';
+    }
+);
 
 $successCount = 0;
 $failureCount = 0;
