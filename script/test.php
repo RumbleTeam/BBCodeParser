@@ -142,6 +142,18 @@ $testSet = array(
         'in' => '[url=http://asd.org/x.php?1&amp;2]asd[/url]',
         'out' => '<url="http://asd.org/x.php?1&amp;2">asd</url>'
     ),
+//    array(
+//        'in' => '[url=http://pl.xyz.com/video/?language[]=pl]xyz[/url]',
+//        'out' => '<url="http://pl.xyz.com/video/?language[]=pl">xyz</url>'
+//    ),
+    array(
+        'in' => '[url="http://pl.xyz.com/video/?language[]=pl"]xyz[/url]',
+        'out' => '<url="http://pl.xyz.com/video/?language[]=pl">xyz</url>'
+    ),
+    array(
+        'in' => '[url="http://pl.xyz.com/video/?language[]=pl" b="asd{[]}xyz"]x{}[]yz[/url]',
+        'out' => '<url="http://pl.xyz.com/video/?language[]=pl" b="asd{[]}xyz">x{}[]yz</url>'
+    ),
 );
 
 $parser = new BBCodeParser($definitions);

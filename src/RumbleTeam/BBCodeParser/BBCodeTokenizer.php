@@ -33,15 +33,16 @@ class BBCodeTokenizer
         $unnamedNameRegex = '\w+[\d\w]*';
         $regexSymbols = '\/\d\w_,.?!@#$%&*()^=:;\+\-\'';
         $quotedSymbols = '\s' . $regexSymbols;
+        $quotedWithBracesSymbols = '\[\]\{\}' . $quotedSymbols;
         $namedNameRegex = '(?<NAME>' . $unnamedNameRegex . ')';
 
         // non matching regex that matches attribute values (for embedding in tag match)
         $unnamedValueRegex =
-            '(?:\"[' . $quotedSymbols . ']*\"|[' . $regexSymbols . ']*)';
+            '(?:\"[' . $quotedWithBracesSymbols . ']*\"|[' . $regexSymbols . ']*)';
 
         // matching regex that matches attribute values
         $namedValueRegex =
-            '(?:\"(?<QUOTED_VALUE>[' . $quotedSymbols . ']*)\"|(?<VALUE>[' . $regexSymbols . ']*))';
+            '(?:\"(?<QUOTED_VALUE>[' . $quotedWithBracesSymbols . ']*)\"|(?<VALUE>[' . $regexSymbols . ']*))';
 
         // non matching regex that matches an attribute (for embedding in tag match)
         $unnamedAttributesRegex =
