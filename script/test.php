@@ -17,6 +17,8 @@ $definitions = array(
     TestTagDefinition::create('b'),
     TestTagDefinition::create('c'),
 
+    TagDefinition::create('d'),
+
     TagDefinition::create('br', true),
     TagDefinition::create('div', false),
     TagDefinition::create('img', true),
@@ -153,6 +155,10 @@ $testSet = array(
     array(
         'in' => '[url="http://pl.xyz.com/video/?language[]=pl" b="asd{[]}xyz"]x{}[]yz[/url]',
         'out' => '<url="http://pl.xyz.com/video/?language[]=pl" b="asd{[]}xyz">§x{}[]yz%</url>'
+    ),
+    array(
+        'in' => '[d]asd[d/]',
+        'out' => '<d>§asd%<d/></d>'
     ),
 );
 

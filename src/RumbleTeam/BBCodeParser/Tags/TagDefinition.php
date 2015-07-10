@@ -74,6 +74,9 @@ class TagDefinition implements TagDefinitionInterface
      */
     public function render(TagInterface $tag, $content = '')
     {
+        $void = $this->void;
+        $selfClosing = $tag->isSelfClosing();
+
         $result = '';
 
         $result .= '<' . $this->id;
@@ -83,11 +86,20 @@ class TagDefinition implements TagDefinitionInterface
             $result .= ' ' . $key . '="' . $value . '"';
         }
 
-        $result .= '>';
-
-        if (!$this->void && !$tag->isSelfClosing())
+        if ($void)
         {
-            $result .= $content . '</' . $this->id . '>';
+            $result .= '>';
+        }
+        else
+        {
+            if ($selfClosing)
+            {
+                $result .= '/>';
+            }
+            else
+            {
+                $result .= '>' . $content . '</' . $this->id . '>';
+            }
         }
 
         return $result;
