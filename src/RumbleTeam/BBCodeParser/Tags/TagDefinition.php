@@ -74,25 +74,36 @@ class TagDefinition implements TagDefinitionInterface
      */
     public function render(TagInterface $tag, $content = '')
     {
-        $void = $this->void;
-        $selfClosing = $tag->isSelfClosing();
-
         $result = '';
 
         $result .= '<' . $this->id;
 
-        foreach ($tag->getAttributes() as $key => $value)
-        {
-            $result .= ' ' . $key . '="' . $value . '"';
-        }
+        $result .= $this->renderAttributes($tag);
 
-        if ($void)
+        $result .= $this->renderTagFinish($tag, $content);
+
+        return $result;
+    }
+
+    /**
+     * Renders the end-part of the tag.
+     *
+     * @param TagInterface $tag
+     * @param $content
+     * @return string
+     *
+     */
+    protected function renderTagFinish(TagInterface $tag, $content)
+    {
+        $result = '';
+
+        if ($this->isVoid())
         {
             $result .= '>';
         }
         else
         {
-            if ($selfClosing)
+            if ($tag->isSelfClosing())
             {
                 $result .= '/>';
             }
@@ -104,4 +115,23 @@ class TagDefinition implements TagDefinitionInterface
 
         return $result;
     }
+
+    /**
+     * Renders the list of attributes including the leading space.
+     *
+     * @param TagInterface $tag
+     * @return string
+     */
+    protected function renderAttributes(TagInterface $tag)
+    {
+        $result = '';
+
+        foreach ($tag->getAttributes() as $key => $value) {
+            $result .= ' ' . $key . '="' . $value . '"';
+        }
+
+        return $result;
+    }
+
+
 }
