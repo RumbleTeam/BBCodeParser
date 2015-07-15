@@ -81,15 +81,15 @@ $testSet = array(
     ),
     array(
         'in' => '[url=http://www.asdf.com/bla/ a=tfd b="asd" c=asd /]',
-        'out' => '<url="http://www.asdf.com/bla/" a="tfd" b="asd" c="asd">'
+        'out' => '<url="http://www.asdf.com/bla/" a="tfd" b="asd" c="asd"/>'
     ),
     array(
         'in' => '[url=http://www.asdf.com/bla/ a=tfd b="asd" c="asd"/]',
-        'out' => '<url="http://www.asdf.com/bla/" a="tfd" b="asd" c="asd">'
+        'out' => '<url="http://www.asdf.com/bla/" a="tfd" b="asd" c="asd"/>'
     ),
     array(
         'in' => '[url="http://www.asdf.com/bla/"/]',
-        'out' => '<url="http://www.asdf.com/bla/">'
+        'out' => '<url="http://www.asdf.com/bla/"/>'
     ),
     array(
         'in' => '[url=http://www.asdf.com/bla/]',

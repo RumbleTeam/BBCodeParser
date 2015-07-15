@@ -32,17 +32,8 @@ class TestTagDefinition extends TagDefinition
             $result .= '="' . $value . '"';
         }
 
-        foreach ($tag->getAttributes() as $key => $value)
-        {
-            $result .= ' ' . $key . '="' . $value . '"';
-        }
-
-        $result .= '>';
-
-        if (!$this->isVoid() && !$tag->isSelfClosing())
-        {
-            $result .= $content . '</' . $this->getId() . '>';
-        }
+        $result .= $this->renderAttributes($tag);
+        $result .= $this->renderTagFinish($tag, $content);
 
         return $result;
     }
