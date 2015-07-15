@@ -21,17 +21,24 @@ class BBCodeParser
      * @var int
      */
     private $maxCodes;
+
     /**
      * @var callable
      */
     private $textRenderCallback;
 
     /**
+     * @var bool
+     */
+    private $autoClose;
+
+    /**
      * @param TagDefinitionInterface[] $bbCodeDefinitions
      * @param int $maxCodes
      * @param callable $textRenderCallback
+     * @param bool $autoClose
      */
-    public function __construct(array $bbCodeDefinitions, $maxCodes = 0, Closure $textRenderCallback = null)
+    public function __construct(array $bbCodeDefinitions, $maxCodes = 0, Closure $textRenderCallback = null, $autoClose = true)
     {
         $definitions = array();
         foreach ($bbCodeDefinitions as $definition)
@@ -41,6 +48,7 @@ class BBCodeParser
 
         $this->definitions = $definitions;
         $this->maxCodes = $maxCodes;
+        $this->autoClose = $autoClose;
 
         $this->textRenderCallback = $textRenderCallback === null
             ? function($text) {return $text;}
@@ -190,16 +198,27 @@ class BBCodeParser
         $renderText = $this->textRenderCallback;
         $result = '';
 
-        if ($this->isLegalChild($parentStack, $definition->getId()))
-        {
+        if ($this->isLegalChild($parentStack, $definition->getId()) &&
+            (
+                $openingToken->isSelfClosing()
+                || $definition->isVoid()
+                || $this->autoClose
+                || $closingToken != null
+            )
+        ) {
             $result .= $definition->render($openingToken, $content);
         }
         else
         {
             $result .= $renderText($openingToken->getMatch());
-            if ($closingToken != null)
+
+            if (!$definition->isVoid())
             {
                 $result .= $content;
+            }
+
+            if ($closingToken != null)
+            {
                 $result .= $renderText($closingToken->getMatch());
             }
         }
