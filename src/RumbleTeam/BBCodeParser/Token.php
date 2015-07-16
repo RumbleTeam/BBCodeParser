@@ -129,4 +129,12 @@ class Token implements TagInterface
     {
         return $this->type === self::TYPE_TAG_SELF_CLOSING;
     }
+
+    /**
+     * @param string $type
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+    }
 }

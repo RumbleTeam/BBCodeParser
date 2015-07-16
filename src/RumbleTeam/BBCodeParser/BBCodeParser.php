@@ -69,8 +69,50 @@ class BBCodeParser
 
         $tokenizer = BBCodeTokenizer::instance();
         $tokenList = $tokenizer->tokenize($text, $maxCodes);
+        $this->validate($tokenList);
         $html = $this->render($tokenList);
         return $html;
+    }
+
+    /**
+     * Checks the tokenlist for validity and updates it.
+     *
+     * @param $tokenList
+     */
+    private function validate($tokenList)
+    {
+        reset($tokenList);
+        $openingTags = array();
+
+        /** @var $token Token */
+        $token = current($tokenList);
+
+        do
+        {
+            if ($isTag = Token::isTagType($tokenType = $token->getType())
+                && isset($this->definitions[$tokenId = $token->getId()])
+            ) {
+                /** @var TagDefinitionInterface $definition */
+                $definition = $this->definitions[$tokenId];
+
+                if($token->getType() == Token::TYPE_TAG_OPENING && !$definition->isVoid() && !$this->autoClose) {
+                    $openingTags[] = $token;
+                }
+
+                if($token->getType() == Token::TYPE_TAG_CLOSING) {
+                    if($openingTags && end($openingTags)->getName() == $token->getName())
+                    {
+                        array_pop($openingTags);
+                    }
+                }
+            }
+        }
+        while ($token = next($tokenList));
+
+        /** @var $invalidToken Token */
+        foreach($openingTags as $invalidToken){
+            $invalidToken->setType(Token::TYPE_TEXT);
+        }
     }
 
     /**
