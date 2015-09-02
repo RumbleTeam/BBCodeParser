@@ -21,4 +21,4 @@ php:
   - hhvm
 
 
-script: phpunit --bootstrap tests\bootstrap.php --no-configuration FullBBCodeParserTest tests\FullBBCodeParserTest.php
+script: phpunit --bootstrap "tests/bootstrap.php" --no-configuration FullBBCodeParserTest "tests/FullBBCodeParserTest.php"
