@@ -19,4 +19,6 @@ php:
   - 7.0
   # aliased to a recent hhvm version
   - hhvm
-  
+
+
+script: phpunit --bootstrap tests\bootstrap.php --no-configuration FullBBCodeParserTest tests\FullBBCodeParserTest.php
